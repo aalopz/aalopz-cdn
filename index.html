@@ -20,7 +20,6 @@
     <ul id="file-list">Loading repository contents...</ul>
 
     <script>
-        // Updated configurations based on your domain and console details
         const USERNAME = 'aalopz';
         const REPO = 'aalopz-cdn'; 
         const BRANCH = 'main'; 
@@ -28,8 +27,8 @@
         document.getElementById('repo-title').innerText = `${REPO} Directory`;
 
         async function fetchFiles() {
-            // FIXED: Using correct ://github.com endpoint format to prevent CORS blocks
-            const apiURL = `https://://github.com/repos/${USERNAME}/${REPO}/contents/`;
+            // FIXED: Standard formatting with two slashes to prevent "not a valid URL" errors
+            const apiURL = "https://github.com" + USERNAME + "/" + REPO + "/contents/";
             const fileList = document.getElementById('file-list');
 
             try {
@@ -47,14 +46,12 @@
                     const li = document.createElement('li');
                     
                     if (file.type === 'dir') {
-                        // Point folders directly relative to your custom domain location
                         const folderUrl = `https://aalopz.xyz{file.path}/`;
                         li.innerHTML = `
                             <a href="${folderUrl}" target="_blank">📁 <span>${file.name}</span></a>
                             <span class="meta">Folder</span>
                         `;
                     } else {
-                        // Use jsDelivr CDN to grab raw text data safely for rendering
                         const targetRawUrl = `https://jsdelivr.net{USERNAME}/${REPO}@${BRANCH}/${file.path}`;
                         
                         li.innerHTML = `
@@ -70,7 +67,7 @@
                 }
 
             } catch (error) {
-                fileList.innerHTML = `<li style="color: red;">Error: ${error.message}. Please double check that your GitHub repository settings match the configured name.</li>`;
+                fileList.innerHTML = `<li style="color: red;">Error: ${error.message}</li>`;
             }
         }
 
