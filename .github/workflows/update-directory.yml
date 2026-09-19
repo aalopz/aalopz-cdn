@@ -6,6 +6,7 @@ on:
       - main # Change to master if your default branch is master
     paths:
       - '**/index.html'
+      - '**/index.htm'
 
 permissions:
   contents: write
@@ -19,10 +20,10 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Scan HTML Files and Inject Data
+    - name: Scan HTML/HTM Files and Inject Data
       run: |
-        # Use find to locate all index.html files excluding the root index.html
-        FILES=$(find . -name "index.html" -not -path "./index.html" -not -path "*/.*")
+        # Updated find command to look for BOTH index.html and index.htm files
+        FILES=$(find . \( -name "index.html" -o -name "index.htm" \) -not -path "./index.html" -not -path "./index.htm" -not -path "*/.*")
         
         # Build the JSON array string
         JSON_ARRAY="const pages = ["
