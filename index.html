@@ -20,19 +20,21 @@
     <ul id="file-list">Loading repository contents...</ul>
 
     <script>
+        // Updated configurations based on your domain and console details
         const USERNAME = 'aalopz';
-        const REPO = 'aalopz-cdn';
+        const REPO = 'aalopz-cdn'; 
         const BRANCH = 'main'; 
 
         document.getElementById('repo-title').innerText = `${REPO} Directory`;
 
         async function fetchFiles() {
-            const apiURL = `https://github.com{USERNAME}/${REPO}/contents/`;
+            // FIXED: Using correct ://github.com endpoint format to prevent CORS blocks
+            const apiURL = `https://://github.com/repos/${USERNAME}/${REPO}/contents/`;
             const fileList = document.getElementById('file-list');
 
             try {
                 const response = await fetch(apiURL);
-                if (!response.ok) throw new Error('Failed to fetch repository contents');
+                if (!response.ok) throw new Error(`Failed to fetch repository contents (Status: ${response.status})`);
                 const data = await response.json();
 
                 fileList.innerHTML = ''; 
@@ -45,17 +47,16 @@
                     const li = document.createElement('li');
                     
                     if (file.type === 'dir') {
-                        // Keep folders navigating naturally to their paths
-                        const folderUrl = `https://${USERNAME}.github.io/${REPO}/${file.path}/`;
+                        // Point folders directly relative to your custom domain location
+                        const folderUrl = `https://aalopz.xyz{file.path}/`;
                         li.innerHTML = `
                             <a href="${folderUrl}" target="_blank">📁 <span>${file.name}</span></a>
                             <span class="meta">Folder</span>
                         `;
                     } else {
-                        // Use a jsDelivr CDN source URL to pull file content safely in the background
+                        // Use jsDelivr CDN to grab raw text data safely for rendering
                         const targetRawUrl = `https://jsdelivr.net{USERNAME}/${REPO}@${BRANCH}/${file.path}`;
                         
-                        // Create a link that calls our HTML loader function
                         li.innerHTML = `
                             <a onclick="openAsHtml('${targetRawUrl}', '${file.name}')">📄 <span>${file.name}</span></a>
                             <span class="meta">${formatBytes(file.size)}</span>
@@ -69,30 +70,26 @@
                 }
 
             } catch (error) {
-                fileList.innerHTML = `<li style="color: red;">Error: ${error.message}</li>`;
+                fileList.innerHTML = `<li style="color: red;">Error: ${error.message}. Please double check that your GitHub repository settings match the configured name.</li>`;
             }
         }
 
-        // Fetches file text content and explicitly boots it up into a new tab as HTML text
         async function openAsHtml(url, fileName) {
             try {
                 const res = await fetch(url);
                 if (!res.ok) throw new Error("Could not retrieve file content");
                 const textContent = await res.text();
 
-                // Open a blank new tab
                 const newWindow = window.open();
                 if (!newWindow) {
                     alert("Pop-up blocked! Please allow pop-ups for this site to view files.");
                     return;
                 }
 
-                // Write the raw content directly into the new document stream as HTML content
                 newWindow.document.open("text/html", "replace");
                 newWindow.document.write(textContent);
                 newWindow.document.close();
                 
-                // Set the page tab title to the file name
                 newWindow.document.title = fileName;
 
             } catch (err) {
