@@ -3,86 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Viewer</title>
+    <title>aalopz CDN</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; background: #f6f8fa; color: #24292e; }
-        h1 { border-bottom: 1px solid #eaecef; padding-bottom: 10px; }
-        ul { list-style: none; padding: 0; }
-        li { padding: 12px; background: white; margin-bottom: 8px; border: 1px solid #e1e4e8; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
-        a { color: #0366d6; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; width: 100%; }
-        a:hover { text-decoration: underline; }
-        .meta { font-size: 0.85em; color: #586069; white-space: nowrap; margin-left: 10px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f6f8fa; color: #24292e; padding: 2rem; max-width: 800px; margin: 0 auto; }
+        h1 { border-bottom: 1px solid #e1e4e8; padding-bottom: 0.3em; }
+        .list-container { background: #fff; border: 1px solid #e1e4e8; border-radius: 6px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        ul { list-style-type: none; padding: 0; margin: 0; }
+        li { padding: 8px 12px; border-bottom: 1px solid #f1f1f1; display: flex; align-items: center; }
+        li:last-child { border-bottom: none; }
+        a { color: #0366d6; text-decoration: none; font-weight: 500; font-size: 1.1rem; width: 100%; display: block; }
+        a:hover { text-decoration: underline; color: #0056b3; }
+        .icon { margin-right: 10px; font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
-    <h1 id="repo-title">aalopz-cdn Directory</h1>
-    <ul id="file-list">Loading repository contents...</ul>
+    <h1>aalopz CDN</h1>
+    <div class="list-container">
+        <ul id="directory-list">
+            <!-- The list items will render dynamically from the JSON below -->
+        </ul>
+    </div>
 
     <script>
-        const USERNAME = 'aalopz';
-        const REPO = 'aalopz-cdn'; 
-        const BRANCH = 'main'; 
+        // DATA_PLACEHOLDER - Do not delete this line. The GitHub Action updates the array below.
+        const pages = [];
 
-        async function fetchFiles() {
-            // Official GitHub API Endpoint
-            const apiURL = `https://github.com{USERNAME}/${REPO}/contents/`;
-            const fileList = document.getElementById('file-list');
-
-            try {
-                const response = await fetch(apiURL);
-                if (!response.ok) throw new Error(`Failed to fetch repository contents (Status: ${response.status})`);
-                const data = await response.json();
-
-                fileList.innerHTML = ''; 
-
-                data.forEach(file => {
-                    // Ignore hidden files and configuration items
-                    if (file.name.startsWith('.') || file.name === 'index.html' || file.name === 'README.md' || file.name === 'CNAME') {
-                        return;
-                    }
-
-                    const li = document.createElement('li');
-                    let targetUrl = '';
-                    
-                    if (file.type === 'dir') {
-                        // Point folders directly to their path inside your custom domain
-                        targetUrl = `https://aalopz.xyz{file.path}/`;
-                        li.innerHTML = `
-                            <a href="${targetUrl}" target="_blank">📁 <span>${file.name}</span></a>
-                            <span class="meta">Folder</span>
-                        `;
-                    } else {
-                        // FIX: Combines your raw file address with HTMLPreview to render code cleanly as an HTML webpage without downloading
-                        const rawFileUrl = `https://githubusercontent.com{USERNAME}/${REPO}/${BRANCH}/${file.path}`;
-                        targetUrl = `https://github.io{rawFileUrl}`;
-                        
-                        li.innerHTML = `
-                            <a href="${targetUrl}" target="_blank">📄 <span>${file.name}</span></a>
-                            <span class="meta">${formatBytes(file.size)}</span>
-                        `;
-                    }
-                    fileList.appendChild(li);
-                });
-
-                if (fileList.children.length === 0) {
-                    fileList.innerHTML = '<li>No viewable files found.</li>';
-                }
-
-            } catch (error) {
-                fileList.innerHTML = `<li style="color: red;">Error: ${error.message}</li>`;
-            }
+        const listContainer = document.getElementById('directory-list');
+        
+        if (pages.length === 0) {
+            listContainer.innerHTML = '<li>No sub-pages found yet.</li>';
+        } else {
+            pages.forEach(page => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span class="icon">📄</span><a href="${page.url}" target="_blank" rel="noopener noreferrer">${page.name}</a>`;
+                listContainer.appendChild(li);
+            });
         }
-
-        function formatBytes(bytes) {
-            if (!bytes || bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        fetchFiles();
     </script>
 </body>
 </html>

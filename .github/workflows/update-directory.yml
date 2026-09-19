@@ -1,0 +1,54 @@
+name: Auto-Update Directory Pages
+
+on:
+  push:
+    branches:
+      - main # Change to master if your default branch is master
+    paths:
+      - '**/index.html'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]' # Prevents an infinite commit loop
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Scan HTML Files and Inject Data
+      run: |
+        # Use find to locate all index.html files excluding the root index.html
+        FILES=$(find . -name "index.html" -not -path "./index.html" -not -path "*/.*")
+        
+        # Build the JSON array string
+        JSON_ARRAY="const pages = ["
+        for file in $FILES; do
+          # Format path cleanly for URLs (remove leading dot)
+          CLEAN_PATH=$(echo "$file" | sed 's|^\./||')
+          # Extract the folder name to display as the title
+          FOLDER_NAME=$(dirname "$CLEAN_PATH")
+          
+          JSON_ARRAY="$JSON_ARRAY{\"name\": \"$FOLDER_NAME\", \"url\": \"$CLEAN_PATH\"},"
+        done
+        # Strip the trailing comma and close array bracket
+        JSON_ARRAY=$(echo "$JSON_ARRAY" | sed 's/,$//')
+        JSON_ARRAY="$JSON_ARRAY];"
+        
+        # Replace the dummy template line in the root index.html with our dynamic array
+        sed -i "s|const pages = \[\];|${JSON_ARRAY}|" index.html
+
+    - name: Commit and Push Changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@://github.com"
+        git add index.html
+        if ! git diff --cached --quiet; then
+          git commit -m "chore: auto-update directory mapping [skip ci]"
+          git push
+        else
+          echo "No folder changes detected."
+        fi
