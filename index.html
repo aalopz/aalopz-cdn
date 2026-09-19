@@ -3,49 +3,14 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="A directory of HTML projects hosted on aalopz-cdn.">
 	<title>aalopz CDN | Directory</title>
-	<style>
-		:root { color-scheme: light; --ink: #18231f; --muted: #68746f; --paper: #f4f1e9; --panel: #fffdf8; --line: #d9d4c7; --accent: #d95836; --accent-dark: #a33a22; --shadow: 0 18px 45px rgba(46, 52, 43, .1); }
-		* { box-sizing: border-box; }
-		body { margin: 0; min-width: 320px; color: var(--ink); background: var(--paper); font-family: Georgia, 'Times New Roman', serif; }
-		body::before { position: fixed; inset: 0; z-index: -1; content: ''; opacity: .55; background-image: linear-gradient(rgba(24, 35, 31, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(24, 35, 31, .035) 1px, transparent 1px); background-size: 32px 32px; mask-image: linear-gradient(to bottom, black, transparent 75%); }
-		main { width: min(1100px, calc(100% - 40px)); margin: 0 auto; padding: 56px 0 72px; }
-		header { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; margin-bottom: 42px; }
-		.eyebrow { margin: 0 0 14px; color: var(--accent-dark); font: 700 12px/1.2 'Trebuchet MS', sans-serif; letter-spacing: .14em; text-transform: uppercase; }
-		h1 { max-width: 620px; margin: 0; font-size: clamp(44px, 7vw, 82px); line-height: .91; letter-spacing: -.045em; }
-		.intro { max-width: 420px; margin: 18px 0 0; color: var(--muted); font-size: 18px; line-height: 1.5; }
-		.status { min-width: 190px; padding: 16px 18px; border: 1px solid var(--line); background: rgba(255, 253, 248, .72); box-shadow: var(--shadow); }
-		.status-label { display: block; margin-bottom: 5px; color: var(--muted); font: 700 11px 'Trebuchet MS', sans-serif; letter-spacing: .1em; text-transform: uppercase; }
-		#status { font-size: 16px; }
-		.toolbar { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 18px; }
-		.toolbar h2 { margin: 0; font-size: 24px; }
-		#filter { width: min(320px, 50%); padding: 11px 14px; border: 1px solid var(--line); border-radius: 0; color: var(--ink); background: var(--panel); font: 15px 'Trebuchet MS', sans-serif; }
-		#filter:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
-		#pages { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
-		.page-link { display: flex; min-height: 128px; flex-direction: column; justify-content: space-between; padding: 20px; border: 1px solid var(--line); color: var(--ink); background: var(--panel); text-decoration: none; box-shadow: 0 3px 0 rgba(24, 35, 31, .04); transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
-		.page-link:hover, .page-link:focus-visible { border-color: var(--accent); box-shadow: 0 10px 22px rgba(46, 52, 43, .12); transform: translateY(-3px); }
-		.page-name { overflow-wrap: anywhere; font-size: 23px; line-height: 1.05; }
-		.page-path { overflow-wrap: anywhere; color: var(--muted); font: 12px/1.4 'Trebuchet MS', sans-serif; }
-		.empty { grid-column: 1 / -1; padding: 28px; border: 1px dashed var(--line); color: var(--muted); background: rgba(255, 253, 248, .6); }
-		footer { margin-top: 32px; color: var(--muted); font: 12px 'Trebuchet MS', sans-serif; }
-		footer a { color: var(--accent-dark); }
-		@media (max-width: 650px) { main { width: min(100% - 28px, 1100px); padding-top: 32px; } header { display: block; margin-bottom: 32px; } .status { width: fit-content; margin-top: 24px; } .toolbar { align-items: stretch; flex-direction: column; gap: 12px; } #filter { width: 100%; } }
-	</style>
 </head>
 <body>
-	<main>
-		<header>
-			<div>
-				<p class="eyebrow">aalopz CDN</p>
-            	    </div>
-			<div class="status" aria-live="polite"><span class="status-label">Directory status</span><span id="status">Loading pages...</span></div>
-		</header>
-		<section aria-labelledby="pages-heading">
-			<div class="toolbar"><h2 id="pages-heading">All pages</h2><input id="filter" type="search" placeholder="Filter pages" aria-label="Filter pages"></div>
-			<div id="pages" aria-live="polite"></div>
-		</section>
-	</main>
+	<h1>aalopz CDN</h1>
+	<p id="status" aria-live="polite">Loading pages...</p>
+	<label for="filter">Filter pages:</label>
+	<input id="filter" type="search" placeholder="Filter pages">
+	<ul id="pages" aria-live="polite"></ul>
 	<script>
 		const repository = 'aalopz/aalopz-cdn';
 		const branch = 'main';
@@ -55,8 +20,8 @@
 		let pages = [];
 
 		function pageName(path) {
-			const fileName = path.split('/').pop().replace(/\.html?$/i, '');
-			return fileName.toLowerCase() === 'index' ? path.split('/').at(-2) || fileName : fileName;
+			const parts = path.split('/');
+			return parts.length > 1 ? parts.at(-2) : 'root';
 		}
 
 		function renderPages() {
@@ -64,20 +29,18 @@
 			const visiblePages = pages.filter((page) => page.path.toLowerCase().includes(query));
 			pagesElement.replaceChildren();
 			if (!visiblePages.length) {
-				const empty = document.createElement('p');
-				empty.className = 'empty';
+				const empty = document.createElement('li');
 				empty.textContent = query ? 'No pages match that filter.' : 'No HTML pages were found.';
 				pagesElement.append(empty);
 				return;
 			}
 			visiblePages.forEach((page) => {
 				const link = document.createElement('a');
-				link.className = 'page-link';
 				link.href = page.path;
-				link.innerHTML = '<span class="page-name"></span><span class="page-path"></span>';
-				link.querySelector('.page-name').textContent = pageName(page.path);
-				link.querySelector('.page-path').textContent = page.path;
-				pagesElement.append(link);
+				link.textContent = pageName(page.path);
+				const item = document.createElement('li');
+				item.append(link);
+				pagesElement.append(item);
 			});
 		}
 
@@ -86,7 +49,7 @@
 			const response = await fetch(endpoint, { headers: { Accept: 'application/vnd.github+json' } });
 			if (!response.ok) throw new Error(`GitHub returned ${response.status}`);
 			const tree = await response.json();
-			pages = tree.tree.filter((entry) => entry.type === 'blob' && /\.html?$/i.test(entry.path) && entry.path !== 'index.html').map((entry) => ({ path: entry.path })).sort((left, right) => left.path.localeCompare(right.path));
+			pages = tree.tree.filter((entry) => entry.type === 'blob' && /(^|\/)index\.html?$/i.test(entry.path) && entry.path !== 'index.html').map((entry) => ({ path: entry.path })).sort((left, right) => left.path.localeCompare(right.path));
 			statusElement.textContent = `${pages.length} page${pages.length === 1 ? '' : 's'} found`;
 			renderPages();
 		}
@@ -94,7 +57,7 @@
 		filterElement.addEventListener('input', renderPages);
 		loadPages().catch((error) => {
 			statusElement.textContent = 'Unable to load pages';
-			pagesElement.innerHTML = '<p class="empty">The directory could not reach GitHub right now. Please try again shortly.</p>';
+			pagesElement.innerHTML = '<li>The directory could not reach GitHub right now. Please try again shortly.</li>';
 			console.error(error);
 		});
 	</script>
