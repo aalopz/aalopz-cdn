@@ -88,6 +88,8 @@
 				const link = document.createElement('a');
 				link.className = 'page-link';
 				link.href = `./${page.path}`;
+				link.target = '_blank';
+				link.rel = 'noopener noreferrer';
 				link.textContent = pageName(page.path);
 				nameCell.append(icon, link);
 				const pathCell = document.createElement('td');
@@ -96,6 +98,8 @@
 				const openLink = document.createElement('a');
 				openLink.className = 'open-link';
 				openLink.href = `./${page.path}`;
+				openLink.target = '_blank';
+				openLink.rel = 'noopener noreferrer';
 				openLink.textContent = 'Open';
 				openCell.append(openLink);
 				item.append(nameCell, pathCell, openCell);
