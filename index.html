@@ -9,7 +9,7 @@
         h1 { border-bottom: 1px solid #eaecef; padding-bottom: 10px; }
         ul { list-style: none; padding: 0; }
         li { padding: 12px; background: white; margin-bottom: 8px; border: 1px solid #e1e4e8; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
-        a { color: #0366d6; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; width: 100%; cursor: pointer; }
+        a { color: #0366d6; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; width: 100%; }
         a:hover { text-decoration: underline; }
         .meta { font-size: 0.85em; color: #586069; white-space: nowrap; margin-left: 10px; }
     </style>
@@ -25,8 +25,8 @@
         const BRANCH = 'main'; 
 
         async function fetchFiles() {
-            // FIXED: Fully hardcoded correct api URL with proper slashes and endpoint subdomain
-            const apiURL = "https://github.com";
+            // Official GitHub API Endpoint
+            const apiURL = `https://github.com{USERNAME}/${REPO}/contents/`;
             const fileList = document.getElementById('file-list');
 
             try {
@@ -37,23 +37,28 @@
                 fileList.innerHTML = ''; 
 
                 data.forEach(file => {
+                    // Ignore hidden files and configuration items
                     if (file.name.startsWith('.') || file.name === 'index.html' || file.name === 'README.md' || file.name === 'CNAME') {
                         return;
                     }
 
                     const li = document.createElement('li');
+                    let targetUrl = '';
                     
                     if (file.type === 'dir') {
-                        const folderUrl = `https://aalopz.xyz{file.path}/`;
+                        // Point folders directly to their path inside your custom domain
+                        targetUrl = `https://aalopz.xyz{file.path}/`;
                         li.innerHTML = `
-                            <a href="${folderUrl}" target="_blank">📁 <span>${file.name}</span></a>
+                            <a href="${targetUrl}" target="_blank">📁 <span>${file.name}</span></a>
                             <span class="meta">Folder</span>
                         `;
                     } else {
-                        const targetRawUrl = `https://jsdelivr.net{USERNAME}/${REPO}@${BRANCH}/${file.path}`;
+                        // FIX: Combines your raw file address with HTMLPreview to render code cleanly as an HTML webpage without downloading
+                        const rawFileUrl = `https://githubusercontent.com{USERNAME}/${REPO}/${BRANCH}/${file.path}`;
+                        targetUrl = `https://github.io{rawFileUrl}`;
                         
                         li.innerHTML = `
-                            <a onclick="openAsHtml('${targetRawUrl}', '${file.name}')">📄 <span>${file.name}</span></a>
+                            <a href="${targetUrl}" target="_blank">📄 <span>${file.name}</span></a>
                             <span class="meta">${formatBytes(file.size)}</span>
                         `;
                     }
@@ -66,29 +71,6 @@
 
             } catch (error) {
                 fileList.innerHTML = `<li style="color: red;">Error: ${error.message}</li>`;
-            }
-        }
-
-        async function openAsHtml(url, fileName) {
-            try {
-                const res = await fetch(url);
-                if (!res.ok) throw new Error("Could not retrieve file content");
-                const textContent = await res.text();
-
-                const newWindow = window.open();
-                if (!newWindow) {
-                    alert("Pop-up blocked! Please allow pop-ups for this site to view files.");
-                    return;
-                }
-
-                newWindow.document.open("text/html", "replace");
-                newWindow.document.write(textContent);
-                newWindow.document.close();
-                
-                newWindow.document.title = fileName;
-
-            } catch (err) {
-                alert("Failed to preview file as HTML: " + err.message);
             }
         }
 
