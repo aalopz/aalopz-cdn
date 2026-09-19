@@ -5,82 +5,51 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>aalopz CDN</title>
 	<style>
-		:root { color-scheme: light; --blue: #1a73e8; --blue-soft: #e8f0fe; --ink: #202124; --muted: #5f6368; --line: #dadce0; --surface: #fff; --page: #fff; --hover: #f8fafd; }
+		:root { color-scheme: light; --ink: #222; --muted: #6b6b6b; --line: #dedede; --hover: #f7f7f7; }
 		* { box-sizing: border-box; }
-		body { margin: 0; min-width: 320px; color: var(--ink); background: var(--page); font: 14px Arial, sans-serif; }
-		button, input { font: inherit; }
-		button { border: 0; cursor: pointer; }
-		.topbar { display: flex; align-items: center; gap: 24px; height: 64px; padding: 0 24px; border-bottom: 1px solid var(--line); }
-		.brand { display: flex; align-items: center; gap: 10px; min-width: 220px; color: var(--muted); font-size: 20px; }
-		.brand-mark { display: grid; width: 30px; height: 30px; place-items: center; color: #fff; background: var(--blue); font-weight: 700; }
-		.search { display: flex; align-items: center; width: min(720px, 100%); height: 46px; padding: 0 16px; border-radius: 24px; background: #f1f3f4; }
-		.search:focus-within { background: #fff; box-shadow: 0 1px 3px rgba(60, 64, 67, .28); }
-		.search-icon { margin-right: 12px; color: var(--muted); font-size: 20px; }
-		#filter { width: 100%; border: 0; outline: 0; color: var(--ink); background: transparent; }
-		.account { margin-left: auto; color: var(--muted); font-size: 18px; white-space: nowrap; }
-		.layout { display: flex; min-height: calc(100vh - 64px); }
-		.sidebar { width: 240px; padding: 20px 12px; border-right: 1px solid var(--line); }
-		.new-button { display: flex; align-items: center; gap: 12px; width: 112px; height: 48px; margin: 0 0 24px 8px; padding: 0 18px; border: 1px solid var(--line); border-radius: 24px; color: var(--ink); background: #fff; box-shadow: 0 1px 2px rgba(60, 64, 67, .2); font-size: 15px; }
-		.new-button:hover { background: var(--hover); box-shadow: 0 2px 5px rgba(60, 64, 67, .2); }
-		.plus { color: var(--blue); font-size: 24px; font-weight: 300; }
-		.nav-item { display: flex; align-items: center; gap: 16px; width: 100%; padding: 10px 20px; border-radius: 0 18px 18px 0; color: var(--ink); text-decoration: none; }
-		.nav-item.active { color: #174ea6; background: var(--blue-soft); font-weight: 700; }
-		.nav-icon { width: 18px; color: var(--muted); text-align: center; font-size: 17px; }
-		.content { width: min(1200px, 100%); padding: 32px 32px 56px; }
-		.breadcrumb { display: flex; align-items: center; gap: 8px; margin: 0 0 28px; color: var(--muted); font-size: 22px; }
-		.breadcrumb strong { color: var(--ink); font-weight: 400; }
-		.breadcrumb span { color: var(--muted); }
-		.toolbar { display: flex; align-items: center; justify-content: space-between; min-height: 42px; margin-bottom: 16px; }
-		.toolbar h1 { margin: 0; font-size: 16px; font-weight: 400; }
+		body { margin: 0; min-width: 320px; color: var(--ink); background: #fff; font: 14px Arial, sans-serif; }
+		.container { width: min(920px, calc(100% - 32px)); margin: 0 auto; padding: 42px 0 64px; }
+		.header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 34px; }
+		h1 { margin: 0 0 8px; font-size: 25px; font-weight: 400; }
+		.subtitle { margin: 0; color: var(--muted); }
+		.search { width: min(300px, 100%); }
+		#filter { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; outline: 0; color: var(--ink); background: #fff; }
+		#filter:focus { border-color: #888; }
+		.toolbar { display: flex; align-items: center; justify-content: space-between; min-height: 38px; margin-bottom: 8px; }
+		.toolbar h2 { margin: 0; font-size: 15px; font-weight: 600; }
 		#status { color: var(--muted); font-size: 13px; }
-		.table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-		.table th { padding: 0 12px 12px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 12px; font-weight: 400; text-align: left; }
-		.table th:first-child { width: 48%; }
-		.table th:last-child { width: 100px; }
-		.table td { height: 58px; padding: 8px 12px; border-bottom: 1px solid #f1f3f4; overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; }
+		.table { width: 100%; border-collapse: collapse; border-top: 1px solid var(--line); }
+		.table th { padding: 11px 14px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 12px; font-weight: 400; text-align: left; }
+		.table th:first-child { width: 52%; }
+		.table th:last-child { width: 90px; }
+		.table td { height: 52px; padding: 8px 14px; border-bottom: 1px solid var(--line); overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; }
 		.table tr:hover td { background: var(--hover); }
-		.name-cell { display: flex; align-items: center; gap: 14px; color: var(--ink); }
-		.folder-icon { color: #5f6368; font-size: 20px; }
-		.page-link { overflow: hidden; color: var(--ink); text-decoration: none; text-overflow: ellipsis; }
-		.page-link:hover { color: var(--blue); text-decoration: underline; }
-		.open-link { color: var(--blue); text-decoration: none; }
-		.open-link:hover { text-decoration: underline; }
-		.empty { padding: 28px 12px; color: var(--muted); }
+		.name-cell { display: flex; align-items: center; gap: 12px; color: var(--ink); }
+		.folder-icon { color: var(--muted); font-size: 17px; }
+		.page-link, .open-link { color: var(--ink); text-decoration: none; }
+		.page-link:hover, .open-link:hover { text-decoration: underline; }
+		.empty { padding: 24px 14px; color: var(--muted); }
 		@media (max-width: 720px) {
-			.topbar { gap: 12px; padding: 0 14px; }
-			.brand { min-width: auto; }
-			.brand span:last-child, .account { display: none; }
-			.sidebar { width: 62px; padding: 20px 8px; }
-			.new-button { width: 46px; margin-left: 0; padding: 0; justify-content: center; }
-			.new-button span:last-child, .nav-item span:last-child { display: none; }
-			.nav-item { justify-content: center; padding: 10px 0; }
-			.content { padding: 24px 14px 40px; }
-			.table th:nth-child(2), .table td:nth-child(2), .table th:nth-child(3), .table td:nth-child(3) { display: none; }
+			.container { width: min(100% - 24px, 920px); padding-top: 28px; }
+			.header { display: block; }
+			.search { display: block; width: 100%; margin-top: 22px; }
+			.table th:nth-child(2), .table td:nth-child(2) { display: none; }
 			.table th:first-child { width: 75%; }
 		}
 	</style>
 </head>
 <body>
-	<header class="topbar">
-		<div class="brand"><span class="brand-mark">a</span><span>aalopz CDN</span></div>
-		<label class="search" for="filter"><span class="search-icon" aria-hidden="true">⌕</span><input id="filter" type="search" placeholder="Search in My Drive" aria-label="Search in My Drive"></label>
-		<div class="account" aria-hidden="true">●</div>
-	</header>
-	<div class="layout">
-		<aside class="sidebar" aria-label="Drive navigation">
-			<button class="new-button" type="button"><span class="plus" aria-hidden="true">+</span><span>New</span></button>
-			<a class="nav-item active" href="./"><span class="nav-icon" aria-hidden="true">▣</span><span>My Drive</span></a>
-			<a class="nav-item" href="https://github.com/aalopz/aalopz-cdn" rel="noreferrer"><span class="nav-icon" aria-hidden="true">↗</span><span>Repository</span></a>
-		</aside>
-		<main class="content">
-			<nav class="breadcrumb" aria-label="Breadcrumb"><strong>My Drive</strong><span aria-hidden="true">›</span><span>Games</span></nav>
-			<div class="toolbar"><h1>Games</h1><p id="status" aria-live="polite">Loading pages...</p></div>
+	<main class="container">
+		<header class="header">
+			<div><h1>aalopz CDN</h1><p class="subtitle">Available pages</p></div>
+			<label class="search" for="filter"><input id="filter" type="search" placeholder="Search pages" aria-label="Search pages"></label>
+		</header>
+		<div class="toolbar"><h2>Pages</h2><p id="status" aria-live="polite">Loading pages...</p></div>
 			<table class="table">
-				<thead><tr><th>Name</th><th>Type</th><th>Location</th><th>Open</th></tr></thead>
+				<thead><tr><th>Name</th><th>Path</th><th>Open</th></tr></thead>
 				<tbody id="pages" aria-live="polite"></tbody>
 			</table>
-		</main>
-	</div>
+	</main>
 	<script>
 		const repository = 'aalopz/aalopz-cdn';
 		const branch = 'main';
@@ -102,7 +71,7 @@
 				const empty = document.createElement('tr');
 				const cell = document.createElement('td');
 				cell.className = 'empty';
-				cell.colSpan = 4;
+				cell.colSpan = 3;
 				cell.textContent = query ? 'No pages match that filter.' : 'No HTML pages were found.';
 				empty.append(cell);
 				pagesElement.append(empty);
@@ -121,17 +90,15 @@
 				link.href = `./${page.path}`;
 				link.textContent = pageName(page.path);
 				nameCell.append(icon, link);
-				const typeCell = document.createElement('td');
-				typeCell.textContent = 'Folder';
-				const locationCell = document.createElement('td');
-				locationCell.textContent = 'My Drive';
+				const pathCell = document.createElement('td');
+				pathCell.textContent = page.path;
 				const openCell = document.createElement('td');
 				const openLink = document.createElement('a');
 				openLink.className = 'open-link';
 				openLink.href = `./${page.path}`;
 				openLink.textContent = 'Open';
 				openCell.append(openLink);
-				item.append(nameCell, typeCell, locationCell, openCell);
+				item.append(nameCell, pathCell, openCell);
 				pagesElement.append(item);
 			});
 		}
@@ -149,7 +116,7 @@
 		filterElement.addEventListener('input', renderPages);
 		loadPages().catch((error) => {
 			statusElement.textContent = 'Unable to load pages';
-			pagesElement.innerHTML = '<tr><td class="empty" colspan="4">The directory could not reach GitHub right now. Please try again shortly.</td></tr>';
+			pagesElement.innerHTML = '<tr><td class="empty" colspan="3">The directory could not reach GitHub right now. Please try again shortly.</td></tr>';
 			console.error(error);
 		});
 	</script>
