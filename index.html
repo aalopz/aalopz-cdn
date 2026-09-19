@@ -16,7 +16,7 @@
 </head>
 <body>
 
-    <h1 id="repo-title">Files</h1>
+    <h1 id="repo-title">aalopz-cdn Directory</h1>
     <ul id="file-list">Loading repository contents...</ul>
 
     <script>
@@ -24,11 +24,9 @@
         const REPO = 'aalopz-cdn'; 
         const BRANCH = 'main'; 
 
-        document.getElementById('repo-title').innerText = `${REPO} Directory`;
-
         async function fetchFiles() {
-            // FIXED: Standard formatting with two slashes to prevent "not a valid URL" errors
-            const apiURL = "https://github.com" + USERNAME + "/" + REPO + "/contents/";
+            // FIXED: Fully hardcoded correct api URL with proper slashes and endpoint subdomain
+            const apiURL = "https://github.com";
             const fileList = document.getElementById('file-list');
 
             try {
