@@ -4,17 +4,28 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>aalopz CDN</title>
+	<script>
+		try {
+			if (localStorage.getItem('theme') === 'dark') document.documentElement.dataset.theme = 'dark';
+		} catch (error) {
+			console.warn('Unable to load saved theme preference.', error);
+		}
+	</script>
 	<style>
-		:root { color-scheme: light; --ink: #222; --muted: #6b6b6b; --line: #dedede; --hover: #f7f7f7; }
+		:root { color-scheme: light; --ink: #222; --muted: #6b6b6b; --line: #dedede; --hover: #f7f7f7; --page: #fff; --input: #fff; }
+		:root[data-theme="dark"] { color-scheme: dark; --ink: #ededed; --muted: #a9a9a9; --line: #3d3d3d; --hover: #292929; --page: #181818; --input: #222; }
 		* { box-sizing: border-box; }
-		body { margin: 0; min-width: 320px; color: var(--ink); background: #fff; font: 14px Arial, sans-serif; }
+		body { margin: 0; min-width: 320px; color: var(--ink); background: var(--page); font: 14px Arial, sans-serif; }
 		.container { width: min(920px, calc(100% - 32px)); margin: 0 auto; padding: 42px 0 64px; }
 		.header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 34px; }
+		.header-tools { display: flex; align-items: center; gap: 12px; }
 		h1 { margin: 0 0 8px; font-size: 25px; font-weight: 400; }
 		.subtitle { margin: 0; color: var(--muted); }
 		.search { width: min(300px, 100%); }
-		#filter { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; outline: 0; color: var(--ink); background: #fff; }
+		#filter { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; outline: 0; color: var(--ink); background: var(--input); }
 		#filter:focus { border-color: #888; }
+		.theme-toggle { min-width: 72px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 3px; color: var(--ink); background: var(--input); cursor: pointer; }
+		.theme-toggle:hover { background: var(--hover); }
 		.toolbar { display: flex; align-items: center; justify-content: space-between; min-height: 38px; margin-bottom: 8px; }
 		.toolbar h2 { margin: 0; font-size: 15px; font-weight: 600; }
 		#status { color: var(--muted); font-size: 13px; }
@@ -42,7 +53,10 @@
 	<main class="container">
 		<header class="header">
 			<div><h1>aalopz CDN</h1><p class="subtitle">Available pages</p></div>
-			<label class="search" for="filter"><input id="filter" type="search" placeholder="Search pages" aria-label="Search pages"></label>
+			<div class="header-tools">
+				<label class="search" for="filter"><input id="filter" type="search" placeholder="Search pages" aria-label="Search pages"></label>
+				<button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">Dark mode</button>
+			</div>
 		</header>
 		<div class="toolbar"><h2>Pages</h2><p id="status" aria-live="polite">Loading pages...</p></div>
 			<table class="table">
@@ -56,7 +70,20 @@
 		const pagesElement = document.querySelector('#pages');
 		const statusElement = document.querySelector('#status');
 		const filterElement = document.querySelector('#filter');
+		const themeToggle = document.querySelector('#theme-toggle');
 		let pages = [];
+
+		function setTheme(theme) {
+			document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : 'light';
+			const darkMode = document.documentElement.dataset.theme === 'dark';
+			themeToggle.textContent = darkMode ? 'Light mode' : 'Dark mode';
+			themeToggle.setAttribute('aria-pressed', String(darkMode));
+			try {
+				localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+			} catch (error) {
+				console.warn('Unable to save theme preference.', error);
+			}
+		}
 
 		function pageName(path) {
 			const parts = path.split('/');
@@ -84,7 +111,7 @@
 				const icon = document.createElement('span');
 				icon.className = 'folder-icon';
 				icon.setAttribute('aria-hidden', 'true');
-				icon.textContent = '▰';
+				icon.textContent = '🕹️';
 				const link = document.createElement('a');
 				link.className = 'page-link';
 				link.href = `./${page.path}`;
@@ -117,6 +144,10 @@
 			renderPages();
 		}
 
+		setTheme(document.documentElement.dataset.theme || 'light');
+		themeToggle.addEventListener('click', () => {
+			setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+		});
 		filterElement.addEventListener('input', renderPages);
 		loadPages().catch((error) => {
 			statusElement.textContent = 'Unable to load pages';
