@@ -91,6 +91,22 @@
 			return parts.length > 1 ? parts.at(-2) : 'root';
 		}
 
+		function openInBlank(path) {
+			const blankPage = window.open('about:blank', '_blank');
+			if (!blankPage) return;
+			const frame = blankPage.document.createElement('iframe');
+			blankPage.document.title = pageName(path);
+			blankPage.document.body.style.margin = '0';
+			blankPage.document.body.style.height = '100vh';
+			frame.src = new URL(`./${path}`, window.location.href).href;
+			frame.title = pageName(path);
+			frame.style.display = 'block';
+			frame.style.width = '100%';
+			frame.style.height = '100%';
+			frame.style.border = '0';
+			blankPage.document.body.append(frame);
+		}
+
 		function renderPages() {
 			const query = filterElement.value.trim().toLowerCase();
 			const visiblePages = pages.filter((page) => page.path.toLowerCase().includes(query));
@@ -115,20 +131,28 @@
 				icon.textContent = '🕹️';
 				const link = document.createElement('a');
 				link.className = 'page-link';
-				link.href = `./${page.path}`;
+				link.href = 'about:blank';
 				link.target = '_blank';
 				link.rel = 'noopener noreferrer';
 				link.textContent = pageName(page.path);
+				link.addEventListener('click', (event) => {
+					event.preventDefault();
+					openInBlank(page.path);
+				});
 				nameCell.append(icon, link);
 				const pathCell = document.createElement('td');
 				pathCell.textContent = page.path;
 				const openCell = document.createElement('td');
 				const openLink = document.createElement('a');
 				openLink.className = 'open-link';
-				openLink.href = `./${page.path}`;
+				openLink.href = 'about:blank';
 				openLink.target = '_blank';
 				openLink.rel = 'noopener noreferrer';
 				openLink.textContent = 'Open';
+				openLink.addEventListener('click', (event) => {
+					event.preventDefault();
+					openInBlank(page.path);
+				});
 				openCell.append(openLink);
 				item.append(nameCell, pathCell, openCell);
 				pagesElement.append(item);
