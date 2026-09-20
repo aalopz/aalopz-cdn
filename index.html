@@ -6,8 +6,9 @@
 	<title>aalopz CDN</title>
 	<script>
 		try {
-			if (localStorage.getItem('theme') === 'dark') document.documentElement.dataset.theme = 'dark';
+			if (localStorage.getItem('theme') !== 'light') document.documentElement.dataset.theme = 'dark';
 		} catch (error) {
+			document.documentElement.dataset.theme = 'dark';
 			console.warn('Unable to load saved theme preference.', error);
 		}
 	</script>
@@ -144,7 +145,7 @@
 			renderPages();
 		}
 
-		setTheme(document.documentElement.dataset.theme || 'light');
+		setTheme(document.documentElement.dataset.theme || 'dark');
 		themeToggle.addEventListener('click', () => {
 			setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
 		});
