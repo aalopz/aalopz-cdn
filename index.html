@@ -7,12 +7,12 @@
 	<style>
 		:root { color-scheme: dark; --bg: #000; --panel: #161616; --ink: #f1f1f1; --muted: #aaa; --line: #444; --hover: #303030; }
 		* { box-sizing: border-box; }
-		body { display: grid; min-width: 320px; min-height: 100vh; place-items: center; margin: 0; padding: 24px; color: var(--ink); background: var(--bg); font: 16px Arial, sans-serif; }
-		.launcher { width: min(520px, 100%); padding: 28px; border: 1px solid var(--line); background: var(--panel); text-align: center; }
+		body { display: grid; min-width: 320px; min-height: 100vh; place-items: center; margin: 0; padding: 24px; color: var(--ink); background-color: var(--bg); background-image: linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px), linear-gradient(to bottom, #000 0%, #123b8f 52%, #5074ad 100%); background-repeat: repeat, repeat, no-repeat; background-attachment: scroll, scroll, fixed; background-size: 32px 32px, 32px 32px, 100% 100%; font: 16px Arial, sans-serif; }
+		.launcher { width: min(520px, 100%); padding: 28px; border: 1px solid var(--line); border-radius: 8px; background: rgba(70, 70, 70, .3); text-align: center; }
 		h1 { margin: 0 0 8px; font-size: 24px; font-weight: 400; }
 		p { margin: 0 0 24px; color: var(--muted); line-height: 1.5; }
 		.buttons { display: flex; width: 100%; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; margin: 0 auto; }
-		button { padding: 11px 14px; border: 1px solid var(--line); border-radius: 3px; color: var(--ink); background: var(--panel); cursor: pointer; font: inherit; }
+		button { padding: 11px 14px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: rgba(25, 25, 25, .55); cursor: pointer; font: inherit; }
 		button:hover { background: var(--hover); }
 		button:disabled { cursor: wait; opacity: .6; }
 		#status { min-height: 22px; margin-top: 18px; margin-bottom: 0; font-size: 13px; }

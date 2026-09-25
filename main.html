@@ -4,44 +4,43 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>CDN</title>
-	<script>
-		try {
-			if (localStorage.getItem('theme') !== 'light') document.documentElement.dataset.theme = 'dark';
-		} catch (error) {
-			document.documentElement.dataset.theme = 'dark';
-			console.warn('Unable to load saved theme preference.', error);
-		}
-	</script>
 	<style>
-		:root { color-scheme: light; --ink: #222; --muted: #6b6b6b; --line: #dedede; --hover: #f7f7f7; --page: #fff; --input: #fff; }
-		:root[data-theme="dark"] { color-scheme: dark; --ink: #ededed; --muted: #a9a9a9; --line: #3d3d3d; --hover: #292929; --page: #000; --input: #161616; }
+		:root { color-scheme: dark; --ink: #ededed; --muted: #a9a9a9; --line: #3d3d3d; --hover: rgba(70, 70, 70, .3); --page: #000; --input: #161616; }
 		* { box-sizing: border-box; }
-		body { margin: 0; min-width: 320px; color: var(--ink); background: var(--page); font: 14px Arial, sans-serif; }
+		body { margin: 0; min-width: 320px; color: var(--ink); background-color: var(--page); background-image: linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px), linear-gradient(to bottom, #000 0%, #123b8f 52%, #5074ad 100%); background-repeat: repeat, repeat, no-repeat; background-attachment: scroll, scroll, fixed; background-size: 32px 32px, 32px 32px, 100% 100%; font: 14px Arial, sans-serif; }
 		.container { width: min(920px, calc(100% - 32px)); margin: 0 auto; padding: 42px 0 64px; }
 		.header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 34px; }
 		.header-tools { display: flex; align-items: center; gap: 12px; }
 		h1 { margin: 0 0 8px; font-size: 25px; font-weight: 400; }
 		.subtitle { margin: 0; color: var(--muted); }
 		.search { width: min(300px, 100%); }
-		#filter { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; outline: 0; color: var(--ink); background: var(--input); }
+		#filter { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; outline: 0; color: var(--ink); background: rgba(70, 70, 70, .3); }
+		#filter { transition: border-color .18s ease, background-color .18s ease; }
 		#filter:focus { border-color: #888; }
-		.theme-toggle { min-width: 72px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 3px; color: var(--ink); background: var(--input); cursor: pointer; }
-		.theme-toggle:hover { background: var(--hover); }
 		.toolbar { display: flex; align-items: center; justify-content: space-between; min-height: 38px; margin-bottom: 8px; }
+		.toolbar-controls { display: flex; align-items: center; gap: 12px; }
 		.toolbar h2 { margin: 0; font-size: 15px; font-weight: 600; }
+		.sort-label { color: var(--muted); font-size: 12px; }
+		#sort { padding: 7px 9px; border: 1px solid var(--line); border-radius: 3px; color: var(--ink); background: rgba(70, 70, 70, .3); font: inherit; }
 		#status { color: var(--muted); font-size: 13px; }
-		.table { width: 100%; border-collapse: collapse; border-top: 1px solid var(--line); }
-		.table th { padding: 11px 14px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 12px; font-weight: 400; text-align: left; }
-		.table th:first-child { width: 52%; }
-		.table th:last-child { width: 90px; }
-		.table td { height: 52px; padding: 8px 14px; border-bottom: 1px solid var(--line); overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; }
-		.table tr:hover td { background: var(--hover); }
-		.name-cell { display: flex; align-items: center; gap: 12px; color: var(--ink); }
+		.table { width: 100%; border-collapse: collapse; border-top: 1px solid var(--line); table-layout: fixed; }
+		.table th { padding: 11px 14px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 12px; font-weight: 400; text-align: left; vertical-align: middle; }
+		.table th:first-child { width: 64%; }
+		.table th:first-child { padding-left: 48px; }
+		.table th:nth-child(2) { width: 22%; }
+		.table th:last-child { width: 90px; text-align: right; }
+		.table td { height: 52px; padding: 8px 14px; border-bottom: 1px solid var(--line); overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; transition: background-color .18s ease, color .18s ease; }
+		.table td:last-child { text-align: right; }
+		.table tr:hover td { background: var(--hover); color: var(--ink); }
+		.name-cell { display: flex; align-items: center; gap: 12px; color: var(--ink); line-height: 1; }
 		.folder-icon { color: var(--muted); font-size: 17px; }
 		.page-link, .open-link { color: var(--ink); text-decoration: none; }
-		.page-link:hover, .open-link:hover { text-decoration: underline; }
+		.page-link, .open-link { transition: color .18s ease; }
+		.open-link { display: inline-flex; align-items: center; line-height: 1; }
+		.date-cell { display: inline-flex; align-items: center; line-height: 1; }
+		.page-link:hover, .open-link:hover { text-decoration: underline; color: #b9d3ff; }
 		.empty { padding: 24px 14px; color: var(--muted); }
-		.site-footer { position: fixed; right: 0; bottom: 0; left: 0; z-index: 10; padding: 12px 16px; border-top: 1px solid var(--line); background: var(--page); text-align: center; }
+		.site-footer { position: fixed; right: 0; bottom: 0; left: 0; z-index: 10; padding: 12px 16px; border-top: 1px solid var(--line); background: var(--input); text-align: center; }
 		.site-footer a { color: var(--ink); }
 		.page-window { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 24px; background: rgba(0, 0, 0, .65); }
 		.page-window[hidden] { display: none; }
@@ -58,8 +57,9 @@
 			.container { width: min(100% - 24px, 920px); padding: 28px 0 40px; }
 			.header { display: block; }
 			.search { display: block; width: 100%; margin-top: 22px; }
-			.table th:nth-child(2), .table td:nth-child(2) { display: none; }
-			.table th:first-child { width: 75%; }
+			.toolbar { align-items: flex-start; flex-direction: column; gap: 10px; }
+			.toolbar-controls { width: 100%; justify-content: space-between; }
+			.table th:first-child { width: 64%; }
 			.page-window { padding: 10px; }
 		}
 	</style>
@@ -70,12 +70,11 @@
 			<div><h1>aalopz CDN</h1><p class="subtitle">Available pages</p></div>
 			<div class="header-tools">
 				<label class="search" for="filter"><input id="filter" type="search" placeholder="Search pages" aria-label="Search pages"></label>
-				<button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">Dark mode</button>
 			</div>
 		</header>
-		<div class="toolbar"><h2>Pages</h2><p id="status" aria-live="polite">Loading pages...</p></div>
+		<div class="toolbar"><h2>Pages</h2><div class="toolbar-controls"><label class="sort-label" for="sort">Sort by</label><select id="sort" aria-label="Sort pages"><option value="name-asc">Name A-Z</option><option value="name-desc">Name Z-A</option><option value="date-desc">Date added newest</option><option value="date-asc">Date added oldest</option></select><p id="status" aria-live="polite">Loading pages...</p></div></div>
 			<table class="table">
-				<thead><tr><th>Name</th><th>Path</th><th>Open</th></tr></thead>
+				<thead><tr><th>Name</th><th>Date added</th><th>Open</th></tr></thead>
 				<tbody id="pages" aria-live="polite"></tbody>
 			</table>
 	</main>
@@ -92,7 +91,7 @@
 		const pagesElement = document.querySelector('#pages');
 		const statusElement = document.querySelector('#status');
 		const filterElement = document.querySelector('#filter');
-		const themeToggle = document.querySelector('#theme-toggle');
+		const sortElement = document.querySelector('#sort');
 		const pageWindow = document.querySelector('#page-window');
 		const pageWindowTitle = document.querySelector('#page-window-title');
 		const pageFrame = document.querySelector('#page-frame');
@@ -100,18 +99,8 @@
 		const pageWindowFullscreen = document.querySelector('#page-window-fullscreen');
 		const pageWindowPanic = document.querySelector('#page-window-panic');
 		let pages = [];
-
-		function setTheme(theme) {
-			document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : 'light';
-			const darkMode = document.documentElement.dataset.theme === 'dark';
-			themeToggle.textContent = darkMode ? 'Light mode' : 'Dark mode';
-			themeToggle.setAttribute('aria-pressed', String(darkMode));
-			try {
-				localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-			} catch (error) {
-				console.warn('Unable to save theme preference.', error);
-			}
-		}
+		let sortMode = 'name-asc';
+		const dateFormatter = new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 
 		function pageName(path) {
 			const parts = path.split('/');
@@ -142,7 +131,18 @@
 
 		function renderPages() {
 			const query = filterElement.value.trim().toLowerCase();
-			const visiblePages = pages.filter((page) => page.path.toLowerCase().includes(query));
+			const visiblePages = pages.filter((page) => page.path.toLowerCase().includes(query)).sort((left, right) => {
+				if (sortMode.startsWith('date')) {
+					if (!left.dateAdded) return 1;
+					if (!right.dateAdded) return -1;
+					const comparison = left.dateAdded - right.dateAdded;
+					return sortMode.endsWith('desc') ? -comparison : comparison;
+				}
+				const leftValue = sortMode.startsWith('name') ? pageName(left.path) : left.path;
+				const rightValue = sortMode.startsWith('name') ? pageName(right.path) : right.path;
+				const comparison = leftValue.localeCompare(rightValue);
+				return sortMode.endsWith('desc') ? -comparison : comparison;
+			});
 			pagesElement.replaceChildren();
 			if (!visiblePages.length) {
 				const empty = document.createElement('tr');
@@ -171,8 +171,11 @@
 					openInWindow(page.path);
 				});
 				nameCell.append(icon, link);
-				const pathCell = document.createElement('td');
-				pathCell.textContent = page.path;
+				const dateCell = document.createElement('td');
+				const dateValue = document.createElement('span');
+				dateValue.className = 'date-cell';
+				dateValue.textContent = page.dateAdded ? dateFormatter.format(page.dateAdded) : 'Unknown';
+				dateCell.append(dateValue);
 				const openCell = document.createElement('td');
 				const openLink = document.createElement('a');
 				openLink.className = 'open-link';
@@ -183,7 +186,7 @@
 					openInWindow(page.path);
 				});
 				openCell.append(openLink);
-				item.append(nameCell, pathCell, openCell);
+				item.append(nameCell, dateCell, openCell);
 				pagesElement.append(item);
 			});
 		}
@@ -193,16 +196,28 @@
 			const response = await fetch(endpoint, { headers: { Accept: 'application/vnd.github+json' } });
 			if (!response.ok) throw new Error(`GitHub returned ${response.status}`);
 			const tree = await response.json();
-			pages = tree.tree.filter((entry) => entry.type === 'blob' && /(^|\/)index\.html?$/i.test(entry.path) && entry.path !== 'index.html').map((entry) => ({ path: entry.path })).sort((left, right) => left.path.localeCompare(right.path));
+			const pageEntries = tree.tree.filter((entry) => entry.type === 'blob' && /(^|\/)index\.html?$/i.test(entry.path) && entry.path !== 'index.html');
+			pages = await Promise.all(pageEntries.map(async (entry) => {
+				try {
+					const commitsResponse = await fetch(`https://api.github.com/repos/${repository}/commits?path=${encodeURIComponent(entry.path)}&per_page=100`, { headers: { Accept: 'application/vnd.github+json' } });
+					if (!commitsResponse.ok) return { path: entry.path, dateAdded: null };
+					const commits = await commitsResponse.json();
+					const oldestCommit = commits.at(-1);
+					const date = oldestCommit?.commit?.author?.date || oldestCommit?.commit?.committer?.date;
+					return { path: entry.path, dateAdded: date ? new Date(date) : null };
+				} catch (error) {
+					return { path: entry.path, dateAdded: null };
+				}
+			}));
 			statusElement.textContent = `${pages.length} page${pages.length === 1 ? '' : 's'} found`;
 			renderPages();
 		}
 
-		setTheme(document.documentElement.dataset.theme || 'dark');
-		themeToggle.addEventListener('click', () => {
-			setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
-		});
 		filterElement.addEventListener('input', renderPages);
+		sortElement.addEventListener('change', () => {
+			sortMode = sortElement.value;
+			renderPages();
+		});
 		pageWindowClose.addEventListener('click', closePageWindow);
 		pageWindowFullscreen.addEventListener('click', togglePageWindowFullscreen);
 		pageWindowPanic.addEventListener('click', () => window.open('https://www.google.com/', '_blank', 'noopener,noreferrer'));
