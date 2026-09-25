@@ -46,14 +46,10 @@
 		async function openAboutBlank() {
 			const newTab = window.open('about:blank', '_blank');
 			if (!newTab) throw new Error('The browser blocked the new tab.');
-			try {
-				newTab.document.open();
-				newTab.document.write(addBaseUrl(await getMainPage()));
-				newTab.document.close();
-			} catch (error) {
-				newTab.close();
-				throw error;
-			}
+			const pageUrl = new URL(mainPageUrl, window.location.href).href;
+			newTab.document.open();
+			newTab.document.write(`<!doctype html><html><head><title>main.html</title></head><body style="margin:0;height:100vh;overflow:hidden"><iframe src="${pageUrl}" title="main.html" style="display:block;width:100%;height:100%;border:0"></iframe></body></html>`);
+			newTab.document.close();
 		}
 
 		async function openBlob() {
@@ -69,7 +65,10 @@
 			const newTab = window.open('about:blank', '_blank');
 			if (!newTab) throw new Error('The browser blocked the new tab.');
 			const html = addBaseUrl(await getMainPage());
-			newTab.location.href = `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
+			const bytes = new TextEncoder().encode(html);
+			let binary = '';
+			bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
+			newTab.location.href = `data:text/html;base64,${btoa(binary)}`;
 		}
 
 		async function launch(openFunction) {
