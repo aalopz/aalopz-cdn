@@ -18,31 +18,24 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Scan HTML/HTM Files and Inject Data
+    - name: Generate directory manifest
       run: |
-        # Use find to locate all sub-directory index files safely
-        FILES=$(find . \( -name "index.html" -o -name "index.htm" \) -not -path "./index.html" -not -path "./index.htm" -not -path "*/.*")
-        
-        # Build the clean JSON array string
-        JSON_ARRAY="const pages = ["
-        for file in $FILES; do
-          CLEAN_PATH=$(echo "$file" | sed 's|^\./||')
-          FOLDER_NAME=$(dirname "$CLEAN_PATH")
-          JSON_ARRAY="$JSON_ARRAY{\"name\": \"$FOLDER_NAME\", \"url\": \"$CLEAN_PATH\"},"
+        printf '[\n' > directory-pages.json
+        find . \( -name "index.html" -o -name "index.htm" \) -not -path "./index.html" -not -path "./index.htm" -not -path "*/.*" -print0 | sort -z | while IFS= read -r -d '' file; do
+          path=${file#./}
+          date=$(git log --follow --diff-filter=A --format=%cI -- "$file" | tail -n 1)
+          dateValue=null
+          if [ -n "$date" ]; then dateValue="\"$date\""; fi
+          printf '  {"path": "%s", "dateAdded": %s},\n' "$path" "$dateValue" >> directory-pages.json
         done
-        
-        # Format closing array boundaries cleanly
-        JSON_ARRAY=$(echo "$JSON_ARRAY" | sed 's/,$//')
-        JSON_ARRAY="$JSON_ARRAY];"
-        
-        # Inject updated paths array into the main directory index.html
-        sed -i "s|const pages = \[\];|${JSON_ARRAY}|" index.html
+        sed -i '$ s/,$//' directory-pages.json
+        printf ']\n' >> directory-pages.json
 
     - name: Commit and Push Changes
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add index.html
+        git add directory-pages.json
         if ! git diff --cached --quiet; then
           git commit -m "chore: auto-update directory mapping [skip ci]"
           git push

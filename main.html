@@ -201,11 +201,11 @@
 		}
 
 		async function loadPages() {
-			const endpoint = `https://api.github.com/repos/${repository}/git/trees/${branch}?recursive=1`;
+			const endpoint = './directory-pages.json';
 			let tree;
 			try {
-				const response = await fetch(endpoint, { headers: { Accept: 'application/vnd.github+json' } });
-				if (!response.ok) throw new Error(`GitHub returned ${response.status}`);
+				const response = await fetch(endpoint, { cache: 'no-store' });
+				if (!response.ok) throw new Error(`Directory manifest returned ${response.status}`);
 				tree = await response.json();
 			} catch (error) {
 				pages = fallbackPaths.map((path) => ({ path, dateAdded: null }));
@@ -214,19 +214,7 @@
 				console.warn('GitHub directory lookup failed; showing cached paths.', error);
 				return;
 			}
-			const pageEntries = tree.tree.filter((entry) => entry.type === 'blob' && /(^|\/)index\.html?$/i.test(entry.path) && entry.path !== 'index.html');
-			pages = await Promise.all(pageEntries.map(async (entry) => {
-				try {
-					const commitsResponse = await fetch(`https://api.github.com/repos/${repository}/commits?path=${encodeURIComponent(entry.path)}&per_page=100`, { headers: { Accept: 'application/vnd.github+json' } });
-					if (!commitsResponse.ok) return { path: entry.path, dateAdded: null };
-					const commits = await commitsResponse.json();
-					const oldestCommit = commits.at(-1);
-					const date = oldestCommit?.commit?.author?.date || oldestCommit?.commit?.committer?.date;
-					return { path: entry.path, dateAdded: date ? new Date(date) : null };
-				} catch (error) {
-					return { path: entry.path, dateAdded: null };
-				}
-			}));
+			pages = tree.map((entry) => ({ path: entry.path, dateAdded: entry.dateAdded ? new Date(entry.dateAdded) : null }));
 			statusElement.textContent = `${pages.length} page${pages.length === 1 ? '' : 's'} found`;
 			renderPages();
 		}
