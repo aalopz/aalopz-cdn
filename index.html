@@ -11,26 +11,30 @@
 		.launcher { width: min(520px, 100%); padding: 28px; border: 1px solid var(--line); background: var(--panel); text-align: center; }
 		h1 { margin: 0 0 8px; font-size: 24px; font-weight: 400; }
 		p { margin: 0 0 24px; color: var(--muted); line-height: 1.5; }
-		.buttons { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+		.buttons { display: flex; width: 100%; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; margin: 0 auto; }
 		button { padding: 11px 14px; border: 1px solid var(--line); border-radius: 3px; color: var(--ink); background: var(--panel); cursor: pointer; font: inherit; }
 		button:hover { background: var(--hover); }
+		button:disabled { cursor: wait; opacity: .6; }
 		#status { min-height: 22px; margin-top: 18px; margin-bottom: 0; font-size: 13px; }
 	</style>
 </head>
 <body>
 	<main class="launcher">
-		<h1>aalopz CDN launcher</h1>
+		<h1>CDN launcher</h1>
 		<p>Choose how you want to launch the page.</p>
 		<div class="buttons">
 			<button id="about-blank-button" type="button">Open in about:blank</button>
+			<button id="normal-button" type="button">Open normally</button>
 			<button id="blob-button" type="button">Open as Blob</button>
-			<button id="data-button" type="button">Open as Data URI</button>
+			<button id="data-button" type="button" disabled>Preparing Data URI...</button>
 		</div>
 		<p id="status" aria-live="polite"></p>
 	</main>
 	<script>
 		const mainPageUrl = './main.html';
 		const statusElement = document.querySelector('#status');
+		const dataButton = document.querySelector('#data-button');
+		let dataUriUrl = '';
 
 		async function getMainPage() {
 			const response = await fetch(mainPageUrl);
@@ -43,13 +47,23 @@
 			return html.replace(/<head([^>]*)>/i, `<head$1><base href="${baseUrl}">`);
 		}
 
-		async function openAboutBlank() {
+		function openAboutBlank() {
 			const newTab = window.open('about:blank', '_blank');
 			if (!newTab) throw new Error('The browser blocked the new tab.');
 			const pageUrl = new URL(mainPageUrl, window.location.href).href;
-			newTab.document.open();
-			newTab.document.write(`<!doctype html><html><head><title>main.html</title></head><body style="margin:0;height:100vh;overflow:hidden"><iframe src="${pageUrl}" title="main.html" style="display:block;width:100%;height:100%;border:0"></iframe></body></html>`);
-			newTab.document.close();
+			const popupDocument = newTab.document;
+			popupDocument.title = 'main.html';
+			popupDocument.body.style.cssText = 'margin:0;height:100vh;overflow:hidden';
+			const frame = popupDocument.createElement('iframe');
+			frame.src = pageUrl;
+			frame.title = 'main.html';
+			frame.style.cssText = 'display:block;width:100%;height:100%;border:0';
+			popupDocument.body.append(frame);
+		}
+
+		function openNormally() {
+			const newTab = window.open(mainPageUrl, '_blank');
+			if (!newTab) throw new Error('The browser blocked the new tab.');
 		}
 
 		async function openBlob() {
@@ -61,14 +75,20 @@
 			setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
 		}
 
-		async function openDataUri() {
-			const newTab = window.open('about:blank', '_blank');
+		function openDataUri() {
+			if (!dataUriUrl) throw new Error('The Data URI is still preparing.');
+			const newTab = window.open(dataUriUrl, '_blank');
 			if (!newTab) throw new Error('The browser blocked the new tab.');
+		}
+
+		async function prepareDataUri() {
 			const html = addBaseUrl(await getMainPage());
 			const bytes = new TextEncoder().encode(html);
 			let binary = '';
 			bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
-			newTab.location.href = `data:text/html;base64,${btoa(binary)}`;
+			dataUriUrl = `data:text/html;base64,${btoa(binary)}`;
+			dataButton.disabled = false;
+			dataButton.textContent = 'Open as Data URI';
 		}
 
 		async function launch(openFunction) {
@@ -82,8 +102,13 @@
 		}
 
 		document.querySelector('#about-blank-button').addEventListener('click', () => launch(openAboutBlank));
+		document.querySelector('#normal-button').addEventListener('click', () => launch(openNormally));
 		document.querySelector('#blob-button').addEventListener('click', () => launch(openBlob));
 		document.querySelector('#data-button').addEventListener('click', () => launch(openDataUri));
+		prepareDataUri().catch((error) => {
+			dataButton.textContent = 'Data URI unavailable';
+			statusElement.textContent = error.message;
+		});
 	</script>
 </body>
 </html>
