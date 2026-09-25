@@ -3,185 +3,88 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>aalopz CDN</title>
-	<script>
-		try {
-			if (localStorage.getItem('theme') !== 'light') document.documentElement.dataset.theme = 'dark';
-		} catch (error) {
-			document.documentElement.dataset.theme = 'dark';
-			console.warn('Unable to load saved theme preference.', error);
-		}
-	</script>
+	<title>aalopz CDN launcher</title>
 	<style>
-		:root { color-scheme: light; --ink: #222; --muted: #6b6b6b; --line: #dedede; --hover: #f7f7f7; --page: #fff; --input: #fff; }
-		:root[data-theme="dark"] { color-scheme: dark; --ink: #ededed; --muted: #a9a9a9; --line: #3d3d3d; --hover: #292929; --page: #181818; --input: #222; }
+		:root { color-scheme: dark; --bg: #181818; --panel: #222; --ink: #f1f1f1; --muted: #aaa; --line: #444; --hover: #303030; }
 		* { box-sizing: border-box; }
-		body { margin: 0; min-width: 320px; color: var(--ink); background: var(--page); font: 14px Arial, sans-serif; }
-		.container { width: min(920px, calc(100% - 32px)); margin: 0 auto; padding: 42px 0 64px; }
-		.header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 34px; }
-		.header-tools { display: flex; align-items: center; gap: 12px; }
-		h1 { margin: 0 0 8px; font-size: 25px; font-weight: 400; }
-		.subtitle { margin: 0; color: var(--muted); }
-		.search { width: min(300px, 100%); }
-		#filter { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; outline: 0; color: var(--ink); background: var(--input); }
-		#filter:focus { border-color: #888; }
-		.theme-toggle { min-width: 72px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 3px; color: var(--ink); background: var(--input); cursor: pointer; }
-		.theme-toggle:hover { background: var(--hover); }
-		.toolbar { display: flex; align-items: center; justify-content: space-between; min-height: 38px; margin-bottom: 8px; }
-		.toolbar h2 { margin: 0; font-size: 15px; font-weight: 600; }
-		#status { color: var(--muted); font-size: 13px; }
-		.table { width: 100%; border-collapse: collapse; border-top: 1px solid var(--line); }
-		.table th { padding: 11px 14px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 12px; font-weight: 400; text-align: left; }
-		.table th:first-child { width: 52%; }
-		.table th:last-child { width: 90px; }
-		.table td { height: 52px; padding: 8px 14px; border-bottom: 1px solid var(--line); overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; }
-		.table tr:hover td { background: var(--hover); }
-		.name-cell { display: flex; align-items: center; gap: 12px; color: var(--ink); }
-		.folder-icon { color: var(--muted); font-size: 17px; }
-		.page-link, .open-link { color: var(--ink); text-decoration: none; }
-		.page-link:hover, .open-link:hover { text-decoration: underline; }
-		.empty { padding: 24px 14px; color: var(--muted); }
-		.site-footer { position: fixed; right: 0; bottom: 0; left: 0; z-index: 10; padding: 12px 16px; border-top: 1px solid var(--line); background: var(--page); text-align: center; }
-		.site-footer a { color: var(--ink); }
-		@media (max-width: 720px) {
-			.container { width: min(100% - 24px, 920px); padding: 28px 0 40px; }
-			.header { display: block; }
-			.search { display: block; width: 100%; margin-top: 22px; }
-			.table th:nth-child(2), .table td:nth-child(2) { display: none; }
-			.table th:first-child { width: 75%; }
-		}
+		body { display: grid; min-width: 320px; min-height: 100vh; place-items: center; margin: 0; padding: 24px; color: var(--ink); background: var(--bg); font: 16px Arial, sans-serif; }
+		.launcher { width: min(520px, 100%); padding: 28px; border: 1px solid var(--line); background: var(--panel); text-align: center; }
+		h1 { margin: 0 0 8px; font-size: 24px; font-weight: 400; }
+		p { margin: 0 0 24px; color: var(--muted); line-height: 1.5; }
+		.buttons { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+		button { padding: 11px 14px; border: 1px solid var(--line); border-radius: 3px; color: var(--ink); background: var(--panel); cursor: pointer; font: inherit; }
+		button:hover { background: var(--hover); }
+		#status { min-height: 22px; margin-top: 18px; margin-bottom: 0; font-size: 13px; }
 	</style>
 </head>
 <body>
-	<main class="container">
-		<header class="header">
-			<div><h1>aalopz CDN</h1><p class="subtitle">Available pages</p></div>
-			<div class="header-tools">
-				<label class="search" for="filter"><input id="filter" type="search" placeholder="Search pages" aria-label="Search pages"></label>
-				<button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">Dark mode</button>
-			</div>
-		</header>
-		<div class="toolbar"><h2>Pages</h2><p id="status" aria-live="polite">Loading pages...</p></div>
-			<table class="table">
-				<thead><tr><th>Name</th><th>Path</th><th>Open</th></tr></thead>
-				<tbody id="pages" aria-live="polite"></tbody>
-			</table>
+	<main class="launcher">
+		<h1>aalopz CDN launcher</h1>
+		<p>Choose how you want to launch the page.</p>
+		<div class="buttons">
+			<button id="about-blank-button" type="button">Open in about:blank</button>
+			<button id="blob-button" type="button">Open as Blob</button>
+			<button id="data-button" type="button">Open as Data URI</button>
+		</div>
+		<p id="status" aria-live="polite"></p>
 	</main>
-	<footer class="site-footer"><a href="https://docs.google.com/forms/d/e/1FAIpQLScOfplqMiiXHN0TWOAVP_gAOiaIfdgBWS3VvjLhO5C-Ba8JNA/viewform?usp=header" target="_blank" rel="noopener noreferrer">Feedback</a></footer>
 	<script>
-		const repository = 'aalopz/aalopz-cdn';
-		const branch = 'main';
-		const pagesElement = document.querySelector('#pages');
+		const mainPageUrl = './main.html';
 		const statusElement = document.querySelector('#status');
-		const filterElement = document.querySelector('#filter');
-		const themeToggle = document.querySelector('#theme-toggle');
-		let pages = [];
 
-		function setTheme(theme) {
-			document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : 'light';
-			const darkMode = document.documentElement.dataset.theme === 'dark';
-			themeToggle.textContent = darkMode ? 'Light mode' : 'Dark mode';
-			themeToggle.setAttribute('aria-pressed', String(darkMode));
+		async function getMainPage() {
+			const response = await fetch(mainPageUrl);
+			if (!response.ok) throw new Error(`Could not load main.html (${response.status})`);
+			return response.text();
+		}
+
+		function addBaseUrl(html) {
+			const baseUrl = new URL(mainPageUrl, window.location.href).href;
+			return html.replace(/<head([^>]*)>/i, `<head$1><base href="${baseUrl}">`);
+		}
+
+		async function openAboutBlank() {
+			const newTab = window.open('about:blank', '_blank');
+			if (!newTab) throw new Error('The browser blocked the new tab.');
 			try {
-				localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+				newTab.document.open();
+				newTab.document.write(addBaseUrl(await getMainPage()));
+				newTab.document.close();
 			} catch (error) {
-				console.warn('Unable to save theme preference.', error);
+				newTab.close();
+				throw error;
 			}
 		}
 
-		function pageName(path) {
-			const parts = path.split('/');
-			return parts.length > 1 ? parts.at(-2) : 'root';
+		async function openBlob() {
+			const newTab = window.open('about:blank', '_blank');
+			if (!newTab) throw new Error('The browser blocked the new tab.');
+			const blob = new Blob([addBaseUrl(await getMainPage())], { type: 'text/html' });
+			const blobUrl = URL.createObjectURL(blob);
+			newTab.location.href = blobUrl;
+			setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
 		}
 
-		function openInBlank(path) {
-			const blankPage = window.open('about:blank', '_blank');
-			if (!blankPage) return;
-			const frame = blankPage.document.createElement('iframe');
-			blankPage.document.title = pageName(path);
-			blankPage.document.body.style.margin = '0';
-			blankPage.document.body.style.height = '100vh';
-			frame.src = new URL(`./${path}`, window.location.href).href;
-			frame.title = pageName(path);
-			frame.style.display = 'block';
-			frame.style.width = '100%';
-			frame.style.height = '100%';
-			frame.style.border = '0';
-			blankPage.document.body.append(frame);
+		async function openDataUri() {
+			const newTab = window.open('about:blank', '_blank');
+			if (!newTab) throw new Error('The browser blocked the new tab.');
+			const html = addBaseUrl(await getMainPage());
+			newTab.location.href = `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
 		}
 
-		function renderPages() {
-			const query = filterElement.value.trim().toLowerCase();
-			const visiblePages = pages.filter((page) => page.path.toLowerCase().includes(query));
-			pagesElement.replaceChildren();
-			if (!visiblePages.length) {
-				const empty = document.createElement('tr');
-				const cell = document.createElement('td');
-				cell.className = 'empty';
-				cell.colSpan = 3;
-				cell.textContent = query ? 'No pages match that filter.' : 'No HTML pages were found.';
-				empty.append(cell);
-				pagesElement.append(empty);
-				return;
+		async function launch(openFunction) {
+			statusElement.textContent = 'Opening...';
+			try {
+				await openFunction();
+				statusElement.textContent = 'Opened main.html.';
+			} catch (error) {
+				statusElement.textContent = error.message;
 			}
-			visiblePages.forEach((page) => {
-				const item = document.createElement('tr');
-				const nameCell = document.createElement('td');
-				nameCell.className = 'name-cell';
-				const icon = document.createElement('span');
-				icon.className = 'folder-icon';
-				icon.setAttribute('aria-hidden', 'true');
-				icon.textContent = '🕹️';
-				const link = document.createElement('a');
-				link.className = 'page-link';
-				link.href = 'about:blank';
-				link.target = '_blank';
-				link.rel = 'noopener noreferrer';
-				link.textContent = pageName(page.path);
-				link.addEventListener('click', (event) => {
-					event.preventDefault();
-					openInBlank(page.path);
-				});
-				nameCell.append(icon, link);
-				const pathCell = document.createElement('td');
-				pathCell.textContent = page.path;
-				const openCell = document.createElement('td');
-				const openLink = document.createElement('a');
-				openLink.className = 'open-link';
-				openLink.href = 'about:blank';
-				openLink.target = '_blank';
-				openLink.rel = 'noopener noreferrer';
-				openLink.textContent = 'Open';
-				openLink.addEventListener('click', (event) => {
-					event.preventDefault();
-					openInBlank(page.path);
-				});
-				openCell.append(openLink);
-				item.append(nameCell, pathCell, openCell);
-				pagesElement.append(item);
-			});
 		}
 
-		async function loadPages() {
-			const endpoint = `https://api.github.com/repos/${repository}/git/trees/${branch}?recursive=1`;
-			const response = await fetch(endpoint, { headers: { Accept: 'application/vnd.github+json' } });
-			if (!response.ok) throw new Error(`GitHub returned ${response.status}`);
-			const tree = await response.json();
-			pages = tree.tree.filter((entry) => entry.type === 'blob' && /(^|\/)index\.html?$/i.test(entry.path) && entry.path !== 'index.html').map((entry) => ({ path: entry.path })).sort((left, right) => left.path.localeCompare(right.path));
-			statusElement.textContent = `${pages.length} page${pages.length === 1 ? '' : 's'} found`;
-			renderPages();
-		}
-
-		setTheme(document.documentElement.dataset.theme || 'dark');
-		themeToggle.addEventListener('click', () => {
-			setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
-		});
-		filterElement.addEventListener('input', renderPages);
-		loadPages().catch((error) => {
-			statusElement.textContent = 'Unable to load pages';
-			pagesElement.innerHTML = '<tr><td class="empty" colspan="3">The directory could not reach GitHub right now. Please try again shortly.</td></tr>';
-			console.error(error);
-		});
+		document.querySelector('#about-blank-button').addEventListener('click', () => launch(openAboutBlank));
+		document.querySelector('#blob-button').addEventListener('click', () => launch(openBlob));
+		document.querySelector('#data-button').addEventListener('click', () => launch(openDataUri));
 	</script>
 </body>
 </html>

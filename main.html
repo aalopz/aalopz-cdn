@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>aalopz CDN</title>
+	<script>
+		try {
+			if (localStorage.getItem('theme') !== 'light') document.documentElement.dataset.theme = 'dark';
+		} catch (error) {
+			document.documentElement.dataset.theme = 'dark';
+			console.warn('Unable to load saved theme preference.', error);
+		}
+	</script>
+	<style>
+		:root { color-scheme: light; --ink: #222; --muted: #6b6b6b; --line: #dedede; --hover: #f7f7f7; --page: #fff; --input: #fff; }
+		:root[data-theme="dark"] { color-scheme: dark; --ink: #ededed; --muted: #a9a9a9; --line: #3d3d3d; --hover: #292929; --page: #181818; --input: #222; }
+		* { box-sizing: border-box; }
+		body { margin: 0; min-width: 320px; color: var(--ink); background: var(--page); font: 14px Arial, sans-serif; }
+		.container { width: min(920px, calc(100% - 32px)); margin: 0 auto; padding: 42px 0 64px; }
+		.header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 34px; }
+		.header-tools { display: flex; align-items: center; gap: 12px; }
+		h1 { margin: 0 0 8px; font-size: 25px; font-weight: 400; }
+		.subtitle { margin: 0; color: var(--muted); }
+		.search { width: min(300px, 100%); }
+		#filter { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; outline: 0; color: var(--ink); background: var(--input); }
+		#filter:focus { border-color: #888; }
+		.theme-toggle { min-width: 72px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 3px; color: var(--ink); background: var(--input); cursor: pointer; }
+		.theme-toggle:hover { background: var(--hover); }
+		.toolbar { display: flex; align-items: center; justify-content: space-between; min-height: 38px; margin-bottom: 8px; }
+		.toolbar h2 { margin: 0; font-size: 15px; font-weight: 600; }
+		#status { color: var(--muted); font-size: 13px; }
+		.table { width: 100%; border-collapse: collapse; border-top: 1px solid var(--line); }
+		.table th { padding: 11px 14px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 12px; font-weight: 400; text-align: left; }
+		.table th:first-child { width: 52%; }
+		.table th:last-child { width: 90px; }
+		.table td { height: 52px; padding: 8px 14px; border-bottom: 1px solid var(--line); overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; }
+		.table tr:hover td { background: var(--hover); }
+		.name-cell { display: flex; align-items: center; gap: 12px; color: var(--ink); }
+		.folder-icon { color: var(--muted); font-size: 17px; }
+		.page-link, .open-link { color: var(--ink); text-decoration: none; }
+		.page-link:hover, .open-link:hover { text-decoration: underline; }
+		.empty { padding: 24px 14px; color: var(--muted); }
+		.site-footer { position: fixed; right: 0; bottom: 0; left: 0; z-index: 10; padding: 12px 16px; border-top: 1px solid var(--line); background: var(--page); text-align: center; }
+		.site-footer a { color: var(--ink); }
+		.page-window { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 24px; background: rgba(0, 0, 0, .65); }
+		.page-window[hidden] { display: none; }
+		.page-window-content { display: flex; width: min(1200px, 100%); height: min(800px, 100%); flex-direction: column; border: 1px solid var(--line); background: var(--page); box-shadow: 0 12px 40px rgba(0, 0, 0, .35); }
+		.page-window.is-fullscreen { padding: 0; }
+		.page-window.is-fullscreen .page-window-content { width: 100%; height: 100%; border: 0; }
+		.page-window-bar { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 14px; border-bottom: 1px solid var(--line); color: var(--ink); }
+		.page-window-actions { display: flex; gap: 8px; }
+		.page-window-button { padding: 5px 10px; border: 1px solid var(--line); border-radius: 3px; color: var(--ink); background: var(--input); cursor: pointer; }
+		.page-window-button:hover { background: var(--hover); }
+		.page-window-panic { color: #ffb4ab; }
+		#page-frame { width: 100%; flex: 1; border: 0; background: #fff; }
+		@media (max-width: 720px) {
+			.container { width: min(100% - 24px, 920px); padding: 28px 0 40px; }
+			.header { display: block; }
+			.search { display: block; width: 100%; margin-top: 22px; }
+			.table th:nth-child(2), .table td:nth-child(2) { display: none; }
+			.table th:first-child { width: 75%; }
+			.page-window { padding: 10px; }
+		}
+	</style>
+</head>
+<body>
+	<main class="container">
+		<header class="header">
+			<div><h1>aalopz CDN</h1><p class="subtitle">Available pages</p></div>
+			<div class="header-tools">
+				<label class="search" for="filter"><input id="filter" type="search" placeholder="Search pages" aria-label="Search pages"></label>
+				<button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">Dark mode</button>
+			</div>
+		</header>
+		<div class="toolbar"><h2>Pages</h2><p id="status" aria-live="polite">Loading pages...</p></div>
+			<table class="table">
+				<thead><tr><th>Name</th><th>Path</th><th>Open</th></tr></thead>
+				<tbody id="pages" aria-live="polite"></tbody>
+			</table>
+	</main>
+	<section class="page-window" id="page-window" hidden aria-label="Page preview">
+		<div class="page-window-content">
+			<div class="page-window-bar"><span id="page-window-title">Page</span><div class="page-window-actions"><button class="page-window-button" id="page-window-fullscreen" type="button" aria-pressed="false">Fullscreen</button><button class="page-window-button page-window-panic" id="page-window-panic" type="button">Panic</button><button class="page-window-button" id="page-window-close" type="button">Close</button></div></div>
+			<iframe id="page-frame" title="Selected page"></iframe>
+		</div>
+	</section>
+	<footer class="site-footer"><a href="https://docs.google.com/forms/d/e/1FAIpQLScOfplqMiiXHN0TWOAVP_gAOiaIfdgBWS3VvjLhO5C-Ba8JNA/viewform?usp=header" target="_blank" rel="noopener noreferrer">Problems / Requests</a></footer>
+	<script>
+		const repository = 'aalopz/aalopz-cdn';
+		const branch = 'main';
+		const pagesElement = document.querySelector('#pages');
+		const statusElement = document.querySelector('#status');
+		const filterElement = document.querySelector('#filter');
+		const themeToggle = document.querySelector('#theme-toggle');
+		const pageWindow = document.querySelector('#page-window');
+		const pageWindowTitle = document.querySelector('#page-window-title');
+		const pageFrame = document.querySelector('#page-frame');
+		const pageWindowClose = document.querySelector('#page-window-close');
+		const pageWindowFullscreen = document.querySelector('#page-window-fullscreen');
+		const pageWindowPanic = document.querySelector('#page-window-panic');
+		let pages = [];
+
+		function setTheme(theme) {
+			document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : 'light';
+			const darkMode = document.documentElement.dataset.theme === 'dark';
+			themeToggle.textContent = darkMode ? 'Light mode' : 'Dark mode';
+			themeToggle.setAttribute('aria-pressed', String(darkMode));
+			try {
+				localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+			} catch (error) {
+				console.warn('Unable to save theme preference.', error);
+			}
+		}
+
+		function pageName(path) {
+			const parts = path.split('/');
+			return parts.length > 1 ? parts.at(-2) : 'root';
+		}
+
+		function openInWindow(path) {
+			pageWindowTitle.textContent = pageName(path);
+			pageFrame.src = new URL(`./${path}`, window.location.href).href;
+			pageWindow.hidden = false;
+			document.body.style.overflow = 'hidden';
+		}
+
+		function closePageWindow() {
+			pageWindow.hidden = true;
+			pageWindow.classList.remove('is-fullscreen');
+			pageWindowFullscreen.textContent = 'Fullscreen';
+			pageWindowFullscreen.setAttribute('aria-pressed', 'false');
+			pageFrame.src = 'about:blank';
+			document.body.style.overflow = '';
+		}
+
+		function togglePageWindowFullscreen() {
+			const isFullscreen = pageWindow.classList.toggle('is-fullscreen');
+			pageWindowFullscreen.textContent = isFullscreen ? 'Restore' : 'Fullscreen';
+			pageWindowFullscreen.setAttribute('aria-pressed', String(isFullscreen));
+		}
+
+		function renderPages() {
+			const query = filterElement.value.trim().toLowerCase();
+			const visiblePages = pages.filter((page) => page.path.toLowerCase().includes(query));
+			pagesElement.replaceChildren();
+			if (!visiblePages.length) {
+				const empty = document.createElement('tr');
+				const cell = document.createElement('td');
+				cell.className = 'empty';
+				cell.colSpan = 3;
+				cell.textContent = query ? 'No pages match that filter.' : 'No HTML pages were found.';
+				empty.append(cell);
+				pagesElement.append(empty);
+				return;
+			}
+			visiblePages.forEach((page) => {
+				const item = document.createElement('tr');
+				const nameCell = document.createElement('td');
+				nameCell.className = 'name-cell';
+				const icon = document.createElement('span');
+				icon.className = 'folder-icon';
+				icon.setAttribute('aria-hidden', 'true');
+				icon.textContent = '🕹️';
+				const link = document.createElement('a');
+				link.className = 'page-link';
+				link.href = `./${page.path}`;
+				link.textContent = pageName(page.path);
+				link.addEventListener('click', (event) => {
+					event.preventDefault();
+					openInWindow(page.path);
+				});
+				nameCell.append(icon, link);
+				const pathCell = document.createElement('td');
+				pathCell.textContent = page.path;
+				const openCell = document.createElement('td');
+				const openLink = document.createElement('a');
+				openLink.className = 'open-link';
+				openLink.href = `./${page.path}`;
+				openLink.textContent = 'Open';
+				openLink.addEventListener('click', (event) => {
+					event.preventDefault();
+					openInWindow(page.path);
+				});
+				openCell.append(openLink);
+				item.append(nameCell, pathCell, openCell);
+				pagesElement.append(item);
+			});
+		}
+
+		async function loadPages() {
+			const endpoint = `https://api.github.com/repos/${repository}/git/trees/${branch}?recursive=1`;
+			const response = await fetch(endpoint, { headers: { Accept: 'application/vnd.github+json' } });
+			if (!response.ok) throw new Error(`GitHub returned ${response.status}`);
+			const tree = await response.json();
+			pages = tree.tree.filter((entry) => entry.type === 'blob' && /(^|\/)index\.html?$/i.test(entry.path) && entry.path !== 'index.html').map((entry) => ({ path: entry.path })).sort((left, right) => left.path.localeCompare(right.path));
+			statusElement.textContent = `${pages.length} page${pages.length === 1 ? '' : 's'} found`;
+			renderPages();
+		}
+
+		setTheme(document.documentElement.dataset.theme || 'dark');
+		themeToggle.addEventListener('click', () => {
+			setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+		});
+		filterElement.addEventListener('input', renderPages);
+		pageWindowClose.addEventListener('click', closePageWindow);
+		pageWindowFullscreen.addEventListener('click', togglePageWindowFullscreen);
+		pageWindowPanic.addEventListener('click', () => window.open('https://www.google.com/', '_blank', 'noopener,noreferrer'));
+		pageWindow.addEventListener('click', (event) => {
+			if (event.target === pageWindow) closePageWindow();
+		});
+		document.addEventListener('keydown', (event) => {
+			if (event.key === 'Escape' && !pageWindow.hidden) closePageWindow();
+		});
+		loadPages().catch((error) => {
+			statusElement.textContent = 'Unable to load pages';
+			pagesElement.innerHTML = '<tr><td class="empty" colspan="3">The directory could not reach GitHub right now. Please try again shortly.</td></tr>';
+			console.error(error);
+		});
+	</script>
+</body>
+</html>
