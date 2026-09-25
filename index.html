@@ -52,7 +52,7 @@
 			if (!newTab) throw new Error('The browser blocked the new tab.');
 			const pageUrl = new URL(mainPageUrl, window.location.href).href;
 			const popupDocument = newTab.document;
-			popupDocument.title = 'main.html';
+			popupDocument.title = 'CDN';
 			popupDocument.body.style.cssText = 'margin:0;height:100vh;overflow:hidden';
 			const frame = popupDocument.createElement('iframe');
 			frame.src = pageUrl;
@@ -77,8 +77,11 @@
 
 		function openDataUri() {
 			if (!dataUriUrl) throw new Error('The Data URI is still preparing.');
-			const newTab = window.open(dataUriUrl, '_blank');
-			if (!newTab) throw new Error('The browser blocked the new tab.');
+			const link = document.createElement('a');
+			link.href = dataUriUrl;
+			link.target = '_blank';
+			link.rel = 'noopener noreferrer';
+			link.click();
 		}
 
 		async function prepareDataUri() {
