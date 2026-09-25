@@ -238,7 +238,7 @@
 		});
 		pageWindowClose.addEventListener('click', closePageWindow);
 		pageWindowFullscreen.addEventListener('click', togglePageWindowFullscreen);
-		pageWindowPanic.addEventListener('click', () => window.open('https://www.google.com/', '_blank', 'noopener,noreferrer'));
+		pageWindowPanic.addEventListener('click', () => { window.location.href = 'https://www.google.com/'; });
 		pageWindow.addEventListener('click', (event) => {
 			if (event.target === pageWindow) closePageWindow();
 		});
