@@ -77,11 +77,16 @@
 
 		function openDataUri() {
 			if (!dataUriUrl) throw new Error('The Data URI is still preparing.');
-			const link = document.createElement('a');
-			link.href = dataUriUrl;
-			link.target = '_blank';
-			link.rel = 'noopener noreferrer';
-			link.click();
+			const newTab = window.open('about:blank', '_blank');
+			if (!newTab) throw new Error('The browser blocked the new tab.');
+			const popupDocument = newTab.document;
+			popupDocument.title = 'CDN';
+			popupDocument.body.style.cssText = 'margin:0;height:100vh;overflow:hidden';
+			const frame = popupDocument.createElement('iframe');
+			frame.src = dataUriUrl;
+			frame.title = 'CDN';
+			frame.style.cssText = 'display:block;width:100%;height:100%;border:0';
+			popupDocument.body.append(frame);
 		}
 
 		async function prepareDataUri() {
