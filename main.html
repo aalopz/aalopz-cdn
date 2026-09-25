@@ -120,7 +120,7 @@
 
 		function openInWindow(path) {
 			pageWindowTitle.textContent = pageName(path);
-			pageFrame.src = new URL(`./${path}`, window.location.href).href;
+			pageFrame.src = new URL(`./${path}`, document.baseURI).href;
 			pageWindow.hidden = false;
 			document.body.style.overflow = 'hidden';
 		}
