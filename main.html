@@ -98,6 +98,15 @@
 		const pageWindowClose = document.querySelector('#page-window-close');
 		const pageWindowFullscreen = document.querySelector('#page-window-fullscreen');
 		const pageWindowPanic = document.querySelector('#page-window-panic');
+		const fallbackPaths = [
+			'a-dance-of-fire-and-ice/index.html', 'awesome-tanks/index.htm', 'bloons-td5/index.html',
+			'cluster-truck/index.html', 'cookie-clicker/index.html', 'crazy-cattle-3d/index.html',
+			'eaglercraft/index.html', 'getting-over-it/index.html', 'jelly-drift/index.html',
+			'ovo/index.html', 'papas-burgeria/index.htm', 'papas-freezeria/index.htm',
+			'papas-pancakeria/index.htm', 'papas-pizzeria/index.html', 'papas-wingeria/index.htm',
+			'polytrack/index.html', 'red-ball-4/index.html', 'slime-rancher/index.html',
+			'slow-roads/index.html', 'stickman-hook/index.html'
+		];
 		let pages = [];
 		let sortMode = 'name-asc';
 		const dateFormatter = new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
@@ -193,9 +202,18 @@
 
 		async function loadPages() {
 			const endpoint = `https://api.github.com/repos/${repository}/git/trees/${branch}?recursive=1`;
-			const response = await fetch(endpoint, { headers: { Accept: 'application/vnd.github+json' } });
-			if (!response.ok) throw new Error(`GitHub returned ${response.status}`);
-			const tree = await response.json();
+			let tree;
+			try {
+				const response = await fetch(endpoint, { headers: { Accept: 'application/vnd.github+json' } });
+				if (!response.ok) throw new Error(`GitHub returned ${response.status}`);
+				tree = await response.json();
+			} catch (error) {
+				pages = fallbackPaths.map((path) => ({ path, dateAdded: null }));
+				statusElement.textContent = `${pages.length} pages found (cached list)`;
+				renderPages();
+				console.warn('GitHub directory lookup failed; showing cached paths.', error);
+				return;
+			}
 			const pageEntries = tree.tree.filter((entry) => entry.type === 'blob' && /(^|\/)index\.html?$/i.test(entry.path) && entry.path !== 'index.html');
 			pages = await Promise.all(pageEntries.map(async (entry) => {
 				try {
