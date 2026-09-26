@@ -47,7 +47,11 @@
 		.page-window-content { display: flex; width: min(1200px, 100%); height: min(800px, 100%); flex-direction: column; border: 1px solid var(--line); background: var(--page); box-shadow: 0 12px 40px rgba(0, 0, 0, .35); }
 		.page-window.is-fullscreen { padding: 0; }
 		.page-window.is-fullscreen .page-window-content { width: 100%; height: 100%; border: 0; }
+		.page-window.is-header-hidden .page-window-bar { display: none; }
 		.page-window-bar { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 14px; border-bottom: 1px solid var(--line); color: var(--ink); }
+		.page-window-header-toggle { position: absolute; top: 8px; left: 50%; z-index: 1; display: none; width: 34px; height: 34px; padding: 0; border: 1px solid var(--line); border-radius: 4px; color: var(--ink); background: var(--input); font-size: 20px; line-height: 1; cursor: pointer; transform: translateX(-50%); }
+		.page-window-header-toggle:hover { background: var(--hover); }
+		.page-window.is-fullscreen .page-window-header-toggle { display: block; }
 		.page-window-actions { display: flex; gap: 8px; }
 		.page-window-button { padding: 5px 10px; border: 1px solid var(--line); border-radius: 3px; color: var(--ink); background: var(--input); cursor: pointer; }
 		.page-window-button:hover { background: var(--hover); }
@@ -83,6 +87,7 @@
 			<div class="page-window-bar"><span id="page-window-title">Page</span><div class="page-window-actions"><button class="page-window-button" id="page-window-fullscreen" type="button" aria-pressed="false">Fullscreen</button><button class="page-window-button page-window-panic" id="page-window-panic" type="button">Panic</button><button class="page-window-button" id="page-window-close" type="button">Close</button></div></div>
 			<iframe id="page-frame" title="Selected page"></iframe>
 		</div>
+		<button class="page-window-header-toggle" id="page-window-header-toggle" type="button" aria-label="Hide viewer header" aria-expanded="true" title="Hide viewer header">↑</button>
 	</section>
 	<footer class="site-footer"><a href="https://docs.google.com/forms/d/e/1FAIpQLScOfplqMiiXHN0TWOAVP_gAOiaIfdgBWS3VvjLhO5C-Ba8JNA/viewform?usp=header" target="_blank" rel="noopener noreferrer">Problems / Requests</a></footer>
 	<script>
@@ -97,6 +102,7 @@
 		const pageFrame = document.querySelector('#page-frame');
 		const pageWindowClose = document.querySelector('#page-window-close');
 		const pageWindowFullscreen = document.querySelector('#page-window-fullscreen');
+		const pageWindowHeaderToggle = document.querySelector('#page-window-header-toggle');
 		const pageWindowPanic = document.querySelector('#page-window-panic');
 		const fallbackPaths = [
 			'a-dance-of-fire-and-ice/index.html', 'awesome-tanks/index.htm', 'bloons-td5/index.html',
@@ -126,8 +132,10 @@
 		function closePageWindow() {
 			pageWindow.hidden = true;
 			pageWindow.classList.remove('is-fullscreen');
+			pageWindow.classList.remove('is-header-hidden');
 			pageWindowFullscreen.textContent = 'Fullscreen';
 			pageWindowFullscreen.setAttribute('aria-pressed', 'false');
+			setHeaderToggleState(true);
 			pageFrame.src = 'about:blank';
 			document.body.style.overflow = '';
 		}
@@ -136,6 +144,18 @@
 			const isFullscreen = pageWindow.classList.toggle('is-fullscreen');
 			pageWindowFullscreen.textContent = isFullscreen ? 'Restore' : 'Fullscreen';
 			pageWindowFullscreen.setAttribute('aria-pressed', String(isFullscreen));
+			if (!isFullscreen) {
+				pageWindow.classList.remove('is-header-hidden');
+				setHeaderToggleState(true);
+			}
+		}
+
+		function setHeaderToggleState(isVisible) {
+			pageWindow.classList.toggle('is-header-hidden', !isVisible);
+			pageWindowHeaderToggle.textContent = isVisible ? '↑' : '↓';
+			pageWindowHeaderToggle.setAttribute('aria-label', isVisible ? 'Hide viewer header' : 'Show viewer header');
+			pageWindowHeaderToggle.setAttribute('title', isVisible ? 'Hide viewer header' : 'Show viewer header');
+			pageWindowHeaderToggle.setAttribute('aria-expanded', String(isVisible));
 		}
 
 		function renderPages() {
@@ -226,6 +246,9 @@
 		});
 		pageWindowClose.addEventListener('click', closePageWindow);
 		pageWindowFullscreen.addEventListener('click', togglePageWindowFullscreen);
+		pageWindowHeaderToggle.addEventListener('click', () => {
+			setHeaderToggleState(pageWindow.classList.contains('is-header-hidden'));
+		});
 		pageWindowPanic.addEventListener('click', () => { window.location.href = 'https://www.google.com/'; });
 		pageWindow.addEventListener('click', (event) => {
 			if (event.target === pageWindow) closePageWindow();
