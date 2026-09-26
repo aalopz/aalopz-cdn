@@ -7,8 +7,8 @@
 	<style>
 		:root { color-scheme: dark; --ink: #ededed; --muted: #a9a9a9; --line: #3d3d3d; --hover: rgba(70, 70, 70, .3); --page: #000; --input: #161616; }
 		* { box-sizing: border-box; }
-		body { margin: 0; min-width: 320px; color: var(--ink); background-color: var(--page); background-image: linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px), linear-gradient(to bottom, #000 0%, #123b8f 52%, #5074ad 100%); background-repeat: repeat, repeat, no-repeat; background-attachment: scroll, scroll, fixed; background-size: 32px 32px, 32px 32px, 100% 100%; font: 14px Arial, sans-serif; }
-		.container { width: min(920px, calc(100% - 32px)); margin: 0 auto; padding: 42px 0 64px; }
+		body { margin: 0; min-width: 320px; color: var(--ink); background-color: var(--page); background-image: linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px), linear-gradient(to bottom, #080817 0%, #191a3e 48%, #45478f 100%); background-repeat: repeat, repeat, no-repeat; background-attachment: fixed, fixed, fixed; background-size: 40px 40px, 40px 40px, 100% 100%; font: 14px Arial, sans-serif; }
+		.container { width: min(920px, calc(100% - 32px)); margin: 24px auto 64px; padding: 28px; border: 1px solid var(--line); border-radius: 8px; background: rgba(70, 70, 70, .3); }
 		.header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 34px; }
 		.header-tools { display: flex; align-items: center; gap: 12px; }
 		h1 { margin: 0 0 8px; font-size: 25px; font-weight: 400; }
@@ -44,21 +44,32 @@
 		.site-footer a { color: var(--ink); }
 		.page-window { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 24px; background: rgba(0, 0, 0, .65); }
 		.page-window[hidden] { display: none; }
-		.page-window-content { display: flex; width: min(1200px, 100%); height: min(800px, 100%); flex-direction: column; border: 1px solid var(--line); background: var(--page); box-shadow: 0 12px 40px rgba(0, 0, 0, .35); }
+		.page-window:not([hidden]) { animation: viewer-backdrop-in .2s ease both; }
+		.page-window-content { display: flex; width: min(1200px, 100%); height: min(800px, 100%); flex-direction: column; border: 1px solid var(--line); background: var(--page); box-shadow: 0 12px 40px rgba(0, 0, 0, .35); transition: width .28s ease, height .28s ease, border-width .28s ease; }
+		.page-window:not([hidden]) .page-window-content { animation: viewer-window-in .24s cubic-bezier(.2, .75, .3, 1) both; }
+		.page-window.is-closing { pointer-events: none; animation: viewer-backdrop-out .2s ease both; }
+		.page-window.is-closing .page-window-content { animation: viewer-window-out .2s ease both; }
+		@keyframes viewer-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+		@keyframes viewer-window-in { from { opacity: 0; transform: scale(.96) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+		@keyframes viewer-backdrop-out { from { opacity: 1; } to { opacity: 0; } }
+		@keyframes viewer-window-out { from { opacity: 1; transform: scale(1) translateY(0); } to { opacity: 0; transform: scale(.96) translateY(8px); } }
 		.page-window.is-fullscreen { padding: 0; }
 		.page-window.is-fullscreen .page-window-content { width: 100%; height: 100%; border: 0; }
-		.page-window.is-header-hidden .page-window-bar { display: none; }
-		.page-window-bar { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 14px; border-bottom: 1px solid var(--line); color: var(--ink); }
-		.page-window-header-toggle { position: absolute; top: 8px; left: 50%; z-index: 1; display: none; width: 34px; height: 34px; padding: 0; border: 1px solid var(--line); border-radius: 4px; color: var(--ink); background: var(--input); font-size: 20px; line-height: 1; cursor: pointer; transform: translateX(-50%); }
-		.page-window-header-toggle:hover { background: var(--hover); }
-		.page-window.is-fullscreen .page-window-header-toggle { display: block; }
+		.page-window-bar { display: flex; flex: 0 0 44px; align-items: center; justify-content: space-between; min-height: 44px; overflow: hidden; padding: 0 14px; border-bottom: 1px solid var(--line); color: var(--ink); opacity: 1; transform: translateY(0); transition: flex-basis .24s ease, min-height .24s ease, padding .24s ease, border-width .24s ease, opacity .18s ease, transform .24s ease; }
+		.page-window.is-header-hidden .page-window-bar { flex-basis: 0; min-height: 0; padding-top: 0; padding-bottom: 0; border-bottom-width: 0; opacity: 0; pointer-events: none; transform: translateY(-8px); }
+		.page-window-header-toggle { position: absolute; top: 49px; left: 8px; z-index: 1; display: none; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0; border: 1px solid var(--line); border-radius: 50%; color: var(--ink); background: rgba(70, 70, 70, .3); font-size: 20px; line-height: 1; cursor: pointer; opacity: 0; transform: rotate(0deg); transition: top .24s ease, transform .2s ease, opacity .18s ease, background-color .18s ease; }
+		.page-window-header-toggle:hover, .page-window-header-toggle:focus-visible { opacity: 1; background: var(--hover); }
+		.page-window.is-fullscreen .page-window-header-toggle { display: flex; }
+		.page-window.is-fullscreen:not(.is-header-hidden) .page-window-header-toggle { opacity: 1; }
+		.page-window.is-header-hidden .page-window-header-toggle { top: 5px; transform: rotate(180deg); }
+		@media (prefers-reduced-motion: reduce) { .page-window, .page-window-content, .page-window-header-toggle, .page-window-bar { animation: none; transition: none; } }
 		.page-window-actions { display: flex; gap: 8px; }
 		.page-window-button { padding: 5px 10px; border: 1px solid var(--line); border-radius: 3px; color: var(--ink); background: var(--input); cursor: pointer; }
 		.page-window-button:hover { background: var(--hover); }
 		.page-window-panic { color: #ffb4ab; }
-		#page-frame { width: 100%; flex: 1; border: 0; background: #fff; }
+		#page-frame { width: 100%; flex: 1; border: 0; background: #000; }
 		@media (max-width: 720px) {
-			.container { width: min(100% - 24px, 920px); padding: 28px 0 40px; }
+			.container { width: min(100% - 24px, 920px); margin-top: 12px; padding: 20px 14px 40px; }
 			.header { display: block; }
 			.search { display: block; width: 100%; margin-top: 22px; }
 			.toolbar { align-items: flex-start; flex-direction: column; gap: 10px; }
@@ -98,6 +109,7 @@
 		const filterElement = document.querySelector('#filter');
 		const sortElement = document.querySelector('#sort');
 		const pageWindow = document.querySelector('#page-window');
+		const pageWindowContent = document.querySelector('.page-window-content');
 		const pageWindowTitle = document.querySelector('#page-window-title');
 		const pageFrame = document.querySelector('#page-frame');
 		const pageWindowClose = document.querySelector('#page-window-close');
@@ -129,8 +141,11 @@
 			document.body.style.overflow = 'hidden';
 		}
 
-		function closePageWindow() {
+		function finishClosePageWindow(event) {
+			if (event && (event.target !== pageWindowContent || event.animationName !== 'viewer-window-out')) return;
+			pageWindow.removeEventListener('animationend', finishClosePageWindow);
 			pageWindow.hidden = true;
+			pageWindow.classList.remove('is-closing');
 			pageWindow.classList.remove('is-fullscreen');
 			pageWindow.classList.remove('is-header-hidden');
 			pageWindowFullscreen.textContent = 'Fullscreen';
@@ -138,6 +153,16 @@
 			setHeaderToggleState(true);
 			pageFrame.src = 'about:blank';
 			document.body.style.overflow = '';
+		}
+
+		function closePageWindow() {
+			if (pageWindow.hidden || pageWindow.classList.contains('is-closing')) return;
+			if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+				finishClosePageWindow();
+				return;
+			}
+			pageWindow.addEventListener('animationend', finishClosePageWindow);
+			pageWindow.classList.add('is-closing');
 		}
 
 		function togglePageWindowFullscreen() {
@@ -152,7 +177,7 @@
 
 		function setHeaderToggleState(isVisible) {
 			pageWindow.classList.toggle('is-header-hidden', !isVisible);
-			pageWindowHeaderToggle.textContent = isVisible ? '↑' : '↓';
+			pageWindowHeaderToggle.textContent = '↑';
 			pageWindowHeaderToggle.setAttribute('aria-label', isVisible ? 'Hide viewer header' : 'Show viewer header');
 			pageWindowHeaderToggle.setAttribute('title', isVisible ? 'Hide viewer header' : 'Show viewer header');
 			pageWindowHeaderToggle.setAttribute('aria-expanded', String(isVisible));
